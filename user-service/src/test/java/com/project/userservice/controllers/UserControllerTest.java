@@ -1,9 +1,9 @@
     package com.project.userservice.controllers;
 
     import com.project.userservice.mappers.UserMapper;
-    import com.project.userservice.models.DBUser;
-    import com.project.userservice.models.PublicUser;
-    import com.project.userservice.models.Role;
+    import com.project.userservice.entities.DBUser;
+    import com.project.userservice.dto.PublicUser;
+    import com.project.userservice.entities.enums.Role;
     import com.project.userservice.services.UserService;
     import org.junit.jupiter.api.BeforeEach;
     import org.junit.jupiter.api.Test;

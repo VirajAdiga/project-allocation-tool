@@ -1,13 +1,13 @@
 package com.project.userservice.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.project.userservice.auth.AuthenticationService;
-import com.project.userservice.auth.AuthorizationService;
+import com.project.userservice.services.AuthenticationService;
+import com.project.userservice.services.AuthorizationService;
 import com.project.userservice.config.JwtAuthenticationFilter;
 import com.project.userservice.mappers.UserMapper;
-import com.project.userservice.models.DBUser;
-import com.project.userservice.models.PermissionName;
-import com.project.userservice.models.Role;
+import com.project.userservice.entities.DBUser;
+import com.project.userservice.entities.enums.PermissionName;
+import com.project.userservice.entities.enums.Role;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

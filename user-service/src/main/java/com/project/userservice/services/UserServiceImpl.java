@@ -1,7 +1,9 @@
 package com.project.userservice.services;
 
+import com.project.userservice.dto.PublicUser;
+import com.project.userservice.dto.UpdateUserRequest;
 import com.project.userservice.exception.ResourceNotFoundException;
-import com.project.userservice.models.*;
+import com.project.userservice.entities.*;
 import com.project.userservice.repositories.SkillRepository;
 import com.project.userservice.repositories.UserRepository;
 import jakarta.transaction.Transactional;

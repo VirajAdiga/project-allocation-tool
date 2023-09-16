@@ -1,7 +1,7 @@
 package com.project.userservice.mappers;
 
-import com.project.userservice.models.DBUser;
-import com.project.userservice.models.PublicUser;
+import com.project.userservice.entities.DBUser;
+import com.project.userservice.dto.PublicUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

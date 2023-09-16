@@ -1,7 +1,6 @@
-package com.project.userservice.auth;
+package com.project.userservice.services;
 
-import com.project.userservice.config.JwtService;
-import com.project.userservice.models.DBUser;
+import com.project.userservice.entities.DBUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

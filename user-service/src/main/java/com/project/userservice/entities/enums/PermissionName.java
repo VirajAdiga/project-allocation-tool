@@ -1,4 +1,4 @@
-package com.project.userservice.models;
+package com.project.userservice.entities.enums;
 
 // Enum representing different permission names for user roles.
 public enum PermissionName {

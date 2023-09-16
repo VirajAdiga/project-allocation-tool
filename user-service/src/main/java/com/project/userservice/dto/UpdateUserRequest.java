@@ -1,5 +1,6 @@
-package com.project.userservice.models;
+package com.project.userservice.dto;
 
+import com.project.userservice.entities.DBSkill;
 import lombok.Data;
 
 import java.util.List;

@@ -1,10 +1,10 @@
-package com.project.userservice.auth;
+package com.project.userservice.services;
 
-import com.project.userservice.config.JwtService;
+import com.project.userservice.dto.RegisterRequest;
+import com.project.userservice.dto.AuthenticationRequest;
 import com.project.userservice.exception.UserRegistrationException;
-import com.project.userservice.models.DBUser;
+import com.project.userservice.entities.DBUser;
 import com.project.userservice.repositories.UserRepository;
-import com.project.userservice.services.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;

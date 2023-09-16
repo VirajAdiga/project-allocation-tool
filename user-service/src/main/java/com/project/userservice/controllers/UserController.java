@@ -1,7 +1,10 @@
 package com.project.userservice.controllers;
 
+import com.project.userservice.dto.PublicUser;
+import com.project.userservice.dto.UpdateUserRequest;
+import com.project.userservice.dto.UserListResponse;
 import com.project.userservice.mappers.UserMapper;
-import com.project.userservice.models.*;
+import com.project.userservice.entities.*;
 import com.project.userservice.services.UserService;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;

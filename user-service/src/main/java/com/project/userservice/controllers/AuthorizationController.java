@@ -1,7 +1,10 @@
 package com.project.userservice.controllers;
 
+import com.project.userservice.dto.PublicUser;
+import com.project.userservice.entities.enums.PermissionName;
+import com.project.userservice.entities.enums.Role;
 import com.project.userservice.mappers.UserMapper;
-import com.project.userservice.models.*;
+import com.project.userservice.entities.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;

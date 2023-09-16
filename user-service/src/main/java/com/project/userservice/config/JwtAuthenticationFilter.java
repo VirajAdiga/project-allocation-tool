@@ -1,7 +1,8 @@
 package com.project.userservice.config;
 
-import com.project.userservice.models.DBUser;
+import com.project.userservice.entities.DBUser;
 import com.project.userservice.repositories.UserRepository;
+import com.project.userservice.services.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

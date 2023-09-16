@@ -1,6 +1,7 @@
-package com.project.userservice.models;
+package com.project.userservice.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.project.userservice.dto.User;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

@@ -1,7 +1,7 @@
 package com.project.userservice.mappers;
 
-import com.project.userservice.models.DBSkill;
-import com.project.userservice.models.Skill;
+import com.project.userservice.entities.DBSkill;
+import com.project.userservice.dto.Skill;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;

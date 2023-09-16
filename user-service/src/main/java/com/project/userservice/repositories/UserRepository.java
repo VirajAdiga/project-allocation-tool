@@ -1,6 +1,6 @@
 package com.project.userservice.repositories;
 
-import com.project.userservice.models.DBUser;
+import com.project.userservice.entities.DBUser;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

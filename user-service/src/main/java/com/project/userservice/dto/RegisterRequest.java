@@ -1,6 +1,6 @@
-package com.project.userservice.auth;
+package com.project.userservice.dto;
 
-import com.project.userservice.models.Role;
+import com.project.userservice.entities.enums.Role;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import lombok.AllArgsConstructor;

@@ -1,4 +1,4 @@
-package com.project.userservice.models;
+package com.project.userservice.dto;
 
 import lombok.Builder;
 import lombok.Getter;

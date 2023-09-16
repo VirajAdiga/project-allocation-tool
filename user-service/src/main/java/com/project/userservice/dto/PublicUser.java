@@ -1,6 +1,8 @@
-package com.project.userservice.models;
+package com.project.userservice.dto;
 
 
+import com.project.userservice.dto.Skill;
+import com.project.userservice.entities.enums.Role;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

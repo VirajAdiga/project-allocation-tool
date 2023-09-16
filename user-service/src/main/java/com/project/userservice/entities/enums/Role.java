@@ -1,4 +1,4 @@
-package com.project.userservice.models;
+package com.project.userservice.entities.enums;
 
 // Enum representing different roles that can be assigned to users.
 public enum Role {

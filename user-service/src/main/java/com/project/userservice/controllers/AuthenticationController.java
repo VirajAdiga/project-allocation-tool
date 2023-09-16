@@ -1,10 +1,10 @@
 package com.project.userservice.controllers;
 
-import com.project.userservice.auth.AuthenticationRequest;
-import com.project.userservice.auth.AuthenticationService;
-import com.project.userservice.auth.AuthorizationService;
-import com.project.userservice.auth.RegisterRequest;
-import com.project.userservice.models.DBUser;
+import com.project.userservice.dto.AuthenticationRequest;
+import com.project.userservice.services.AuthenticationService;
+import com.project.userservice.services.AuthorizationService;
+import com.project.userservice.dto.RegisterRequest;
+import com.project.userservice.entities.DBUser;
 import com.project.userservice.services.UserService;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
