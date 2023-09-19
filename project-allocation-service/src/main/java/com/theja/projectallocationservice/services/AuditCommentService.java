@@ -1,7 +1,7 @@
 package com.theja.projectallocationservice.services;
 
 import com.theja.projectallocationservice.exceptions.ResourceNotFoundException;
-import com.theja.projectallocationservice.models.DBAuditComment;
+import com.theja.projectallocationservice.entities.AuditComment;
 import com.theja.projectallocationservice.repositories.AuditCommentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,7 +21,7 @@ public class AuditCommentService {
      *
      * @return List of all audit comments.
      */
-    public List<DBAuditComment> getAllAuditComments() {
+    public List<AuditComment> getAllAuditComments() {
         return auditCommentRepository.findAll();
     }
 
@@ -32,7 +32,7 @@ public class AuditCommentService {
      * @return The audit comment with the specified ID.
      * @throws ResourceNotFoundException If the audit comment with the given ID is not found.
      */
-    public DBAuditComment getAuditCommentById(Long id) {
+    public AuditComment getAuditCommentById(Long id) {
         return auditCommentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Audit comment not found"));
     }
@@ -43,7 +43,7 @@ public class AuditCommentService {
      * @param auditLogId The ID of the audit log.
      * @return List of audit comments associated with the specified audit log.
      */
-    public List<DBAuditComment> getAuditCommentsByAuditLogId(Long auditLogId) {
+    public List<AuditComment> getAuditCommentsByAuditLogId(Long auditLogId) {
         return auditCommentRepository.findByAuditLogId(auditLogId);
     }
 
@@ -53,7 +53,7 @@ public class AuditCommentService {
      * @param auditComment The audit comment to create.
      * @return The created audit comment.
      */
-    public DBAuditComment createAuditComment(DBAuditComment auditComment) {
+    public AuditComment createAuditComment(AuditComment auditComment) {
         return auditCommentRepository.save(auditComment);
     }
 }

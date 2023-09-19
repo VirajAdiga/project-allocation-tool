@@ -1,8 +1,8 @@
 package com.theja.projectallocationservice.Integration_tests.openings;
 
 import com.theja.projectallocationservice.config.RestTemplateConfig;
-import com.theja.projectallocationservice.models.Opening;
-import com.theja.projectallocationservice.models.OpeningStatus;
+import com.theja.projectallocationservice.dto.Opening;
+import com.theja.projectallocationservice.entities.enums.OpeningStatus;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

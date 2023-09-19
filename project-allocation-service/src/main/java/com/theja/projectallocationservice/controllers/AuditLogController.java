@@ -1,7 +1,8 @@
 package com.theja.projectallocationservice.controllers;
 
+import com.theja.projectallocationservice.dto.AuditLogResponse;
 import com.theja.projectallocationservice.mappers.AuditLogMapper;
-import com.theja.projectallocationservice.models.*;
+import com.theja.projectallocationservice.entities.*;
 import com.theja.projectallocationservice.services.AuditLogService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -39,7 +40,7 @@ public class AuditLogController {
     @ApiResponse(responseCode = "200", description = "Audit logs retrieved successfully", content = @Content(schema = @Schema(implementation = AuditLogResponse.class)))
     public ResponseEntity<AuditLogResponse> getAllAuditLogs(@RequestParam(required = false) Integer pageSize, @RequestParam(required = false) Integer pageNumber) {
         // Fetch a paginated list of audit logs
-        Page<DBAuditLog> dbAuditLogs = auditLogService.getAllAuditLogs(pageSize, pageNumber);
+        Page<AuditLog> dbAuditLogs = auditLogService.getAllAuditLogs(pageSize, pageNumber);
         // Convert entity audit logs to model audit logs using the mapper
         // Build a response containing model audit logs and total element count
         AuditLogResponse response = AuditLogResponse.builder()

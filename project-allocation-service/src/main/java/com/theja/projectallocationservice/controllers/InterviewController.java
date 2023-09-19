@@ -1,9 +1,13 @@
 package com.theja.projectallocationservice.controllers;
 
+import com.theja.projectallocationservice.dto.RequestContext;
+import com.theja.projectallocationservice.dto.UpdateFeedbackRequest;
+import com.theja.projectallocationservice.entities.enums.InterviewStatus;
+import com.theja.projectallocationservice.entities.enums.PermissionName;
 import com.theja.projectallocationservice.exceptions.ResourceNotFoundException;
 import com.theja.projectallocationservice.exceptions.UnauthorizedAccessException;
 import com.theja.projectallocationservice.mappers.InterviewMapper;
-import com.theja.projectallocationservice.models.*;
+import com.theja.projectallocationservice.entities.*;
 import com.theja.projectallocationservice.services.ApplicationService;
 import com.theja.projectallocationservice.services.AuditCommentService;
 import com.theja.projectallocationservice.services.AuditLogService;
@@ -53,13 +57,13 @@ public class InterviewController {
      */
     @GetMapping("/interviews/interviewer/{interviewerId}")
     @Operation(summary = "Get interviews by interviewer ID", description = "Retrieve all interviews with a particular interviewer ID")
-    @ApiResponse(responseCode = "200", description = "Interviews retrieved successfully", content = @Content(schema = @Schema(implementation = Interview.class)))
-    public ResponseEntity<List<Interview>> getInterviewsByInterviewerId(@PathVariable Long interviewerId) {
+    @ApiResponse(responseCode = "200", description = "Interviews retrieved successfully", content = @Content(schema = @Schema(implementation = com.theja.projectallocationservice.dto.Interview.class)))
+    public ResponseEntity<List<com.theja.projectallocationservice.dto.Interview>> getInterviewsByInterviewerId(@PathVariable Long interviewerId) {
         // Fetch all interviews associated with the provided interviewer ID
-        List<DBInterview> dbInterviews = interviewService.getInterviewsByInterviewerId(interviewerId);
+        List<Interview> dbInterviews = interviewService.getInterviewsByInterviewerId(interviewerId);
 
         // Convert the DBInterview entities to Interview models
-        List<Interview> interviews = dbInterviews.stream()
+        List<com.theja.projectallocationservice.dto.Interview> interviews = dbInterviews.stream()
                 .map(interviewMapper::entityToModel)
                 .collect(Collectors.toList());
 
@@ -74,12 +78,12 @@ public class InterviewController {
      * @return A ResponseEntity containing the list of interviews and an HTTP status code
      */
     @GetMapping("/interviews")
-    public ResponseEntity<List<Interview>> getInterviewsByApplicationId(@RequestParam Long applicationId) {
+    public ResponseEntity<List<com.theja.projectallocationservice.dto.Interview>> getInterviewsByApplicationId(@RequestParam Long applicationId) {
         // Fetch all interviews associated with the provided application ID
-        List<DBInterview> dbInterviews = interviewService.getInterviewsByApplicationId(applicationId);
+        List<Interview> dbInterviews = interviewService.getInterviewsByApplicationId(applicationId);
 
         // Convert the DBInterview entities to Interview models
-        List<Interview> interviews = dbInterviews.stream()
+        List<com.theja.projectallocationservice.dto.Interview> interviews = dbInterviews.stream()
                 .map(interviewMapper::entityToModel)
                 .collect(Collectors.toList());
 
@@ -95,34 +99,34 @@ public class InterviewController {
      */
     @GetMapping("/interviews/{interviewId}")
     @Operation(summary = "Get interview by ID", description = "Retrieve an interview by its ID")
-    @ApiResponse(responseCode = "200", description = "Interview retrieved successfully", content = @Content(schema = @Schema(implementation = Interview.class)))
-    public ResponseEntity<Interview> getInterview(@PathVariable Long interviewId) {
+    @ApiResponse(responseCode = "200", description = "Interview retrieved successfully", content = @Content(schema = @Schema(implementation = com.theja.projectallocationservice.dto.Interview.class)))
+    public ResponseEntity<com.theja.projectallocationservice.dto.Interview> getInterview(@PathVariable Long interviewId) {
         // Fetch an interview by its ID and convert it to a model
-        DBInterview dbInterview = interviewService.getInterviewById(interviewId);
-        return ResponseEntity.ok(interviewMapper.entityToModel(dbInterview));
+        Interview interview = interviewService.getInterviewById(interviewId);
+        return ResponseEntity.ok(interviewMapper.entityToModel(interview));
     }
 
     /**
      * Creates a new interview for a given application.
      *
      * @param applicationId The ID of the application associated with the interview.
-     * @param dbInterview   The interview details to be created.
+     * @param interview   The interview details to be created.
      * @return The created interview model in the response.
      */
     @PostMapping("/applications/{applicationId}/interviews")
     @Operation(summary = "Create interview", description = "Create a new interview for a given application")
-    @ApiResponse(responseCode = "201", description = "Interview created successfully", content = @Content(schema = @Schema(implementation = Interview.class)))
-    public ResponseEntity<Interview> createInterview(@PathVariable Long applicationId, @RequestBody DBInterview dbInterview) {
+    @ApiResponse(responseCode = "201", description = "Interview created successfully", content = @Content(schema = @Schema(implementation = com.theja.projectallocationservice.dto.Interview.class)))
+    public ResponseEntity<com.theja.projectallocationservice.dto.Interview> createInterview(@PathVariable Long applicationId, @RequestBody Interview interview) {
         // Create an audit log for scheduling an interview
-        DBAuditLog auditLog = auditLogService.createAuditLog(
-                DBAuditLog.builder()
+        AuditLog auditLog = auditLogService.createAuditLog(
+                AuditLog.builder()
                         .action("Scheduling interview for application id " + applicationId)
-                        .user(DBUser.builder().id(requestContext.getLoggedinUser().getId()).build())
+                        .user(User.builder().id(requestContext.getLoggedinUser().getId()).build())
                         .loggedAt(new Date())
                         .auditComments(new ArrayList<>())
                         .build());
         // Check user permissions to schedule an interview
-        auditCommentService.createAuditComment(DBAuditComment.builder()
+        auditCommentService.createAuditComment(AuditComment.builder()
                 .comment("Checking user permissions")
                 .auditLog(auditLog)
                 .build());
@@ -130,19 +134,19 @@ public class InterviewController {
             throw new UnauthorizedAccessException("You don't have permission to schedule an interview.");
         }
         // Fetch the associated application by ID
-        DBApplication application = applicationService.getApplicationById(applicationId);
-        auditCommentService.createAuditComment(DBAuditComment.builder()
+        Application application = applicationService.getApplicationById(applicationId);
+        auditCommentService.createAuditComment(AuditComment.builder()
                 .comment("Application with id " + applicationId + " found")
                 .auditLog(auditLog)
                 .build());
         // Schedule the interview and update its status
         if (application != null) {
-            dbInterview.setApplication(application);
-            dbInterview.setStatus(InterviewStatus.SCHEDULED);
-            dbInterview.setFeedback("");
+            interview.setApplication(application);
+            interview.setStatus(InterviewStatus.SCHEDULED);
+            interview.setFeedback("");
             // Save the created interview and log the action
-            DBInterview dbCreatedInterview = interviewService.createInterview(dbInterview);
-            auditCommentService.createAuditComment(DBAuditComment.builder()
+            Interview dbCreatedInterview = interviewService.createInterview(interview);
+            auditCommentService.createAuditComment(AuditComment.builder()
                     .comment("Interview created successfully")
                     .auditLog(auditLog)
                     .build());
@@ -157,19 +161,19 @@ public class InterviewController {
      * Updates an existing interview's details.
      *
      * @param interviewId The ID of the interview to update.
-     * @param dbInterview The updated interview details.
+     * @param interview The updated interview details.
      * @return The updated interview model in the response.
      */
     @PutMapping("/interviews/{interviewId}")
     @Operation(summary = "Update interview", description = "Update an existing interview's details")
-    @ApiResponse(responseCode = "200", description = "Interview updated successfully", content = @Content(schema = @Schema(implementation = Interview.class)))
-    public ResponseEntity<Interview> updateInterview(@PathVariable Long interviewId, @RequestBody DBInterview dbInterview) {
+    @ApiResponse(responseCode = "200", description = "Interview updated successfully", content = @Content(schema = @Schema(implementation = com.theja.projectallocationservice.dto.Interview.class)))
+    public ResponseEntity<com.theja.projectallocationservice.dto.Interview> updateInterview(@PathVariable Long interviewId, @RequestBody Interview interview) {
         // Check user permissions to update interview details
         if (requestContext.getPermissions() == null || !requestContext.getPermissions().contains(PermissionName.VIEW_PENDING_APPLICATIONS.toString())) {
             throw new UnauthorizedAccessException("You don't have permission to update the interview details.");
         }
         // Update the interview and save the changes
-        DBInterview dbUpdatedInterview = interviewService.updateInterview(interviewId, dbInterview);
+        Interview dbUpdatedInterview = interviewService.updateInterview(interviewId, interview);
         // Return the updated interview
         return ResponseEntity.ok(interviewMapper.entityToModel(dbUpdatedInterview));
     }
@@ -177,7 +181,7 @@ public class InterviewController {
     @PatchMapping("/interviews/{interviewId}/feedback")
     public ResponseEntity<String> updateInterviewFeedback(@PathVariable Long interviewId, @RequestBody UpdateFeedbackRequest request) {
         // Fetch the interview by ID
-        DBInterview interview = interviewService.getInterviewById(interviewId);
+        Interview interview = interviewService.getInterviewById(interviewId);
 
         if (interview != null) {
             // Update the feedback
@@ -202,18 +206,18 @@ public class InterviewController {
      */
     @PatchMapping("/interviews/{interviewId}/status")
     @Operation(summary = "Update interview status", description = "Update the status of an existing interview")
-    @ApiResponse(responseCode = "200", description = "Interview status updated successfully", content = @Content(schema = @Schema(implementation = Interview.class)))
-    public ResponseEntity<Interview> updateInterviewStatus(@PathVariable Long interviewId, @RequestParam InterviewStatus newStatus) {
+    @ApiResponse(responseCode = "200", description = "Interview status updated successfully", content = @Content(schema = @Schema(implementation = com.theja.projectallocationservice.dto.Interview.class)))
+    public ResponseEntity<com.theja.projectallocationservice.dto.Interview> updateInterviewStatus(@PathVariable Long interviewId, @RequestParam InterviewStatus newStatus) {
         // Create an audit log for updating interview status
-        DBAuditLog auditLog = auditLogService.createAuditLog(
-                DBAuditLog.builder()
+        AuditLog auditLog = auditLogService.createAuditLog(
+                AuditLog.builder()
                         .action("Updating status of interview with id " + interviewId)
-                        .user(DBUser.builder().id(requestContext.getLoggedinUser().getId()).build())
+                        .user(User.builder().id(requestContext.getLoggedinUser().getId()).build())
                         .loggedAt(new Date())
                         .auditComments(new ArrayList<>())
                         .build());
         // Check user permissions to update interview status
-        auditCommentService.createAuditComment(DBAuditComment.builder()
+        auditCommentService.createAuditComment(AuditComment.builder()
                 .comment("Checking user permissions")
                 .auditLog(auditLog)
                 .build());
@@ -221,8 +225,8 @@ public class InterviewController {
             throw new UnauthorizedAccessException("You don't have permission to update the interview status.");
         }
         // Fetch the interview by ID
-        DBInterview interview = interviewService.getInterviewById(interviewId);
-        auditCommentService.createAuditComment(DBAuditComment.builder()
+        Interview interview = interviewService.getInterviewById(interviewId);
+        auditCommentService.createAuditComment(AuditComment.builder()
                 .comment("Interview with id " + interviewId + " found")
                 .auditLog(auditLog)
                 .build());
@@ -237,8 +241,8 @@ public class InterviewController {
             // Update the interview status based on newStatus
             interview.setStatus(newStatus);
             // Save the updated interview and log the action
-            DBInterview dbUpdatedInterview = interviewService.updateInterview(interviewId, interview);
-            auditCommentService.createAuditComment(DBAuditComment.builder()
+            Interview dbUpdatedInterview = interviewService.updateInterview(interviewId, interview);
+            auditCommentService.createAuditComment(AuditComment.builder()
                     .comment("Interview status updated successfully")
                     .auditLog(auditLog)
                     .build());

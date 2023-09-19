@@ -1,8 +1,7 @@
 package com.theja.projectallocationservice.mappers;
 
-import com.theja.projectallocationservice.models.DBUser;
-import com.theja.projectallocationservice.models.PublicUser;
-import com.theja.projectallocationservice.models.User;
+import com.theja.projectallocationservice.entities.User;
+import com.theja.projectallocationservice.dto.PublicUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -17,22 +16,22 @@ public class UserMapper {
     private SkillMapper skillMapper;
 
     // Convert a collection of DBUser entities to a collection of User model objects
-    public Collection<User> entityToModel(Collection<DBUser> dbUsers) {
-        if (dbUsers == null) {
+    public Collection<com.theja.projectallocationservice.dto.User> entityToModel(Collection<User> users) {
+        if (users == null) {
             return new ArrayList<>();
         }
         // Map each DBUser entity to its corresponding User model object using Java Stream API
-        return dbUsers.stream().map(this::entityToModel).collect(Collectors.toList());
+        return users.stream().map(this::entityToModel).collect(Collectors.toList());
     }
 
     // Convert a DBUser entity to a User model object
-    public User entityToModel(DBUser dbUser) {
-        return new User(
-                dbUser.getId(),
-                dbUser.getName(),
-                dbUser.getPassword(),
-                dbUser.getEmail(),
-                skillMapper.entityToModel(dbUser.getSkills()),
+    public com.theja.projectallocationservice.dto.User entityToModel(User user) {
+        return new com.theja.projectallocationservice.dto.User(
+                user.getId(),
+                user.getName(),
+                user.getPassword(),
+                user.getEmail(),
+                skillMapper.entityToModel(user.getSkills()),
                 null,
                 null,
                 null,
@@ -41,13 +40,13 @@ public class UserMapper {
     }
 
     // Convert a DBUser entity to a PublicUser model object
-    public PublicUser entityToPublicModel(DBUser dbUser) {
-        if (dbUser != null) {
+    public PublicUser entityToPublicModel(User user) {
+        if (user != null) {
             return new PublicUser(
-                    dbUser.getId(),
-                    dbUser.getName(),
-                    dbUser.getEmail(),
-                    skillMapper.entityToModel(dbUser.getSkills())
+                    user.getId(),
+                    user.getName(),
+                    user.getEmail(),
+                    skillMapper.entityToModel(user.getSkills())
             );
         } else {
             return null;
@@ -55,8 +54,8 @@ public class UserMapper {
     }
 
     // Convert a list of DBUser entities to a list of PublicUser model objects
-    public List<PublicUser> entityToPublicModel(List<DBUser> dbUsers) {
+    public List<PublicUser> entityToPublicModel(List<User> users) {
         // Map each DBUser entity to its corresponding PublicUser model object using Java Stream API
-        return dbUsers.stream().map(this::entityToPublicModel).collect(Collectors.toList());
+        return users.stream().map(this::entityToPublicModel).collect(Collectors.toList());
     }
 }

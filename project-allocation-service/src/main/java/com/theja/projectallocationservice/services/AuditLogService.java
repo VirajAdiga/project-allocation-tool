@@ -1,6 +1,6 @@
 package com.theja.projectallocationservice.services;
 
-import com.theja.projectallocationservice.models.DBAuditLog;
+import com.theja.projectallocationservice.entities.AuditLog;
 import com.theja.projectallocationservice.repositories.AuditLogRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -25,7 +25,7 @@ public class AuditLogService {
      * @param pageNumber The page number to retrieve.
      * @return A page containing a list of audit logs.
      */
-    public Page<DBAuditLog> getAllAuditLogs(Integer pageSize, Integer pageNumber) {
+    public Page<AuditLog> getAllAuditLogs(Integer pageSize, Integer pageNumber) {
         if (pageSize == null) pageSize = 1000;
         if (pageNumber == null) pageNumber = 0;
         PageRequest pageRequest = PageRequest.of(pageNumber, pageSize);
@@ -38,7 +38,7 @@ public class AuditLogService {
      * @param userId The ID of the user.
      * @return List of audit logs associated with the user.
      */
-    public List<DBAuditLog> getAllAuditLogsForUser(Long userId) {
+    public List<AuditLog> getAllAuditLogsForUser(Long userId) {
         return auditLogRepository.findByUserId(userId);
     }
 
@@ -48,8 +48,8 @@ public class AuditLogService {
      * @param id The ID of the audit log to retrieve.
      * @return The audit log with the specified ID, or null if not found.
      */
-    public DBAuditLog getAuditLogById(Long id) {
-        Optional<DBAuditLog> auditLog = auditLogRepository.findById(id);
+    public AuditLog getAuditLogById(Long id) {
+        Optional<AuditLog> auditLog = auditLogRepository.findById(id);
         return auditLog.orElse(null);
     }
 
@@ -59,7 +59,7 @@ public class AuditLogService {
      * @param auditLog The audit log to create.
      * @return The created audit log.
      */
-    public DBAuditLog createAuditLog(DBAuditLog auditLog) {
+    public AuditLog createAuditLog(AuditLog auditLog) {
         return auditLogRepository.save(auditLog);
     }
 }

@@ -1,7 +1,7 @@
 package com.theja.projectallocationservice.services;
 
-import com.theja.projectallocationservice.models.PermissionName;
-import com.theja.projectallocationservice.models.PublicUser;
+import com.theja.projectallocationservice.entities.enums.PermissionName;
+import com.theja.projectallocationservice.dto.PublicUser;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;

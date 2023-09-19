@@ -1,12 +1,10 @@
 package com.theja.projectallocationservice.config;
 
-import com.theja.projectallocationservice.models.PermissionName;
-import com.theja.projectallocationservice.models.RequestContext;
+import com.theja.projectallocationservice.entities.enums.PermissionName;
+import com.theja.projectallocationservice.dto.RequestContext;
 import com.theja.projectallocationservice.services.UserServiceClient;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebFilter;
-import jakarta.servlet.annotation.WebInitParam;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;

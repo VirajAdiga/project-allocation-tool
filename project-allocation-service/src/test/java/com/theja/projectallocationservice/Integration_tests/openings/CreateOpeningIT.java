@@ -2,7 +2,7 @@ package com.theja.projectallocationservice.Integration_tests.openings;
 
 import com.theja.projectallocationservice.config.RestTemplateConfig;
 import com.theja.projectallocationservice.exceptions.CustomResponseErrorHandler;
-import com.theja.projectallocationservice.models.Opening;
+import com.theja.projectallocationservice.dto.Opening;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;

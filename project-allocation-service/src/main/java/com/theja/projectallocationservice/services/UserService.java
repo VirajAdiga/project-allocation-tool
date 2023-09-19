@@ -1,6 +1,6 @@
 package com.theja.projectallocationservice.services;
 
-import com.theja.projectallocationservice.models.DBUser;
+import com.theja.projectallocationservice.entities.User;
 import com.theja.projectallocationservice.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -22,7 +22,7 @@ public class UserService {
      * @param pageNumber The page number to retrieve (0-based).
      * @return A page of free pool users.
      */
-    public Page<DBUser> getFreePoolUsers(Integer pageSize, Integer pageNumber) {
+    public Page<User> getFreePoolUsers(Integer pageSize, Integer pageNumber) {
         if (pageSize == null) pageSize = 1000;
         if (pageNumber == null) pageNumber = 0;
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
@@ -38,7 +38,7 @@ public class UserService {
      * @param pageNumber The page number to retrieve (0-based).
      * @return A page of allocated users within the specified date range.
      */
-    public Page<DBUser> getAllAllocatedUsers(Date startDate, Date endDate, Integer pageSize, Integer pageNumber) {
+    public Page<User> getAllAllocatedUsers(Date startDate, Date endDate, Integer pageSize, Integer pageNumber) {
         if (pageSize == null) pageSize = 1000;
         if (pageNumber == null) pageNumber = 0;
         Pageable pageable = PageRequest.of(pageNumber, pageSize);

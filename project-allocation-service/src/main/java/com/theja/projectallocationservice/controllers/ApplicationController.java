@@ -1,10 +1,14 @@
 package com.theja.projectallocationservice.controllers;
 
+import com.theja.projectallocationservice.dto.ApplicationListResponse;
+import com.theja.projectallocationservice.dto.RequestContext;
+import com.theja.projectallocationservice.entities.enums.ApplicationStatus;
+import com.theja.projectallocationservice.entities.enums.PermissionName;
 import com.theja.projectallocationservice.exceptions.ApplicationNotFoundException;
 import com.theja.projectallocationservice.exceptions.ResourceNotFoundException;
 import com.theja.projectallocationservice.exceptions.UnauthorizedAccessException;
 import com.theja.projectallocationservice.mappers.ApplicationMapper;
-import com.theja.projectallocationservice.models.*;
+import com.theja.projectallocationservice.entities.*;
 import com.theja.projectallocationservice.services.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -63,14 +67,14 @@ public class ApplicationController {
     ) {
         if (requestContext.getPermissions() == null || !requestContext.getPermissions().contains(PermissionName.VIEW_PENDING_APPLICATIONS.toString())) {
             // Create Audit log
-            DBAuditLog auditLog = auditLogService.createAuditLog(
-                    DBAuditLog.builder()
+            AuditLog auditLog = auditLogService.createAuditLog(
+                    AuditLog.builder()
                             .action("Fetching all pending applications")
-                            .user(DBUser.builder().id(requestContext.getLoggedinUser().getId()).build())
+                            .user(User.builder().id(requestContext.getLoggedinUser().getId()).build())
                             .loggedAt(new Date())
                             .auditComments(new ArrayList<>())
                             .build());
-            auditCommentService.createAuditComment(DBAuditComment.builder()
+            auditCommentService.createAuditComment(AuditComment.builder()
                     .comment("Unauthorized user trying to fetch all pending applications")
                     .auditLog(auditLog)
                     .build());
@@ -78,9 +82,9 @@ public class ApplicationController {
         }
         // Fetch applications with filtering and pagination
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
-        Page<DBApplication> pageResult = applicationService.getAllApplicationsByStatus(status, pageable);
+        Page<Application> pageResult = applicationService.getAllApplicationsByStatus(status, pageable);
 
-        List<Application> applicationList = applicationMapper.entityToModel(pageResult.getContent());
+        List<com.theja.projectallocationservice.dto.Application> applicationList = applicationMapper.entityToModel(pageResult.getContent());
 
         ApplicationListResponse response = ApplicationListResponse.builder()
                 .applications(applicationList)
@@ -99,12 +103,12 @@ public class ApplicationController {
      */
     @GetMapping("/applications/{id}")
     @Operation(summary = "Get application by ID", description = "Retrieve an application by its ID")
-    @ApiResponse(responseCode = "200", description = "Application retrieved successfully", content = @Content(schema = @Schema(implementation = Application.class)))
+    @ApiResponse(responseCode = "200", description = "Application retrieved successfully", content = @Content(schema = @Schema(implementation = com.theja.projectallocationservice.dto.Application.class)))
     @ApiResponse(responseCode = "404", description = "Application not found")
-    public ResponseEntity<Application> getApplication(@PathVariable Long id) {
+    public ResponseEntity<com.theja.projectallocationservice.dto.Application> getApplication(@PathVariable Long id) {
         // Fetch a specific application by ID and return it in the response
-        DBApplication dbApplication = applicationService.getApplicationById(id);
-        return ResponseEntity.ok(applicationMapper.entityToModel(dbApplication));
+        Application application = applicationService.getApplicationById(id);
+        return ResponseEntity.ok(applicationMapper.entityToModel(application));
     }
 
     /**
@@ -116,18 +120,18 @@ public class ApplicationController {
      */
     @GetMapping("/applications/details")
     @Operation(summary = "Get application details", description = "Retrieve application details based on openingId and candidateId")
-    @ApiResponse(responseCode = "200", description = "Application details retrieved successfully", content = @Content(schema = @Schema(implementation = Application.class)))
+    @ApiResponse(responseCode = "200", description = "Application details retrieved successfully", content = @Content(schema = @Schema(implementation = com.theja.projectallocationservice.dto.Application.class)))
     @ApiResponse(responseCode = "404", description = "Application not found")
-    public ResponseEntity<Application> getApplicationDetails(
+    public ResponseEntity<com.theja.projectallocationservice.dto.Application> getApplicationDetails(
             @RequestParam Long openingId,
             @RequestParam Long candidateId
     ) {
         // Fetch application details based on openingId and candidateId
-        DBApplication dbApplication = applicationService.getApplicationByOpeningIdAndCandidateId(openingId, candidateId);
+        Application application = applicationService.getApplicationByOpeningIdAndCandidateId(openingId, candidateId);
 
         // If found, return the application; otherwise, throw ResourceNotFoundException
-        if (dbApplication != null) {
-            return ResponseEntity.ok(applicationMapper.entityToModel(dbApplication));
+        if (application != null) {
+            return ResponseEntity.ok(applicationMapper.entityToModel(application));
         } else {
             throw new ResourceNotFoundException("Application not found with opening ID: " + openingId + " or candidate ID " + candidateId);
         }
@@ -142,21 +146,21 @@ public class ApplicationController {
      */
     @PostMapping("/openings/{openingId}/applications")
     @Operation(summary = "Create application", description = "Apply for an opening by creating an application")
-    @ApiResponse(responseCode = "201", description = "Application created successfully", content = @Content(schema = @Schema(implementation = Application.class)))
+    @ApiResponse(responseCode = "201", description = "Application created successfully", content = @Content(schema = @Schema(implementation = com.theja.projectallocationservice.dto.Application.class)))
     @ApiResponse(responseCode = "400", description = "Bad request")
     @ApiResponse(responseCode = "404", description = "Opening not found")
-    public ResponseEntity<Application> createApplication(@PathVariable Long openingId, @RequestBody DBApplication application) {
+    public ResponseEntity<com.theja.projectallocationservice.dto.Application> createApplication(@PathVariable Long openingId, @RequestBody Application application) {
         // Create Audit log
-        DBAuditLog auditLog = auditLogService.createAuditLog(
-                DBAuditLog.builder()
+        AuditLog auditLog = auditLogService.createAuditLog(
+                AuditLog.builder()
                         .action("Applying for opening " + openingId)
-                        .user(DBUser.builder().id(requestContext.getLoggedinUser().getId()).build())
+                        .user(User.builder().id(requestContext.getLoggedinUser().getId()).build())
                         .loggedAt(new Date())
                         .auditComments(new ArrayList<>())
                         .build());
         // Fetch the corresponding opening from the OpeningService using openingId
-        DBOpening opening = openingService.getOpeningById(openingId);
-        auditCommentService.createAuditComment(DBAuditComment.builder()
+        Opening opening = openingService.getOpeningById(openingId);
+        auditCommentService.createAuditComment(AuditComment.builder()
                 .comment("Opening with id " + openingId + " found")
                 .auditLog(auditLog)
                 .build());
@@ -168,8 +172,8 @@ public class ApplicationController {
             application.setAppliedAt(new Date());
             application.setInterviews(new ArrayList<>());
             // Save the application to the database
-            DBApplication dbCreatedApplication = applicationService.createApplication(application);
-            auditCommentService.createAuditComment(DBAuditComment.builder()
+            Application dbCreatedApplication = applicationService.createApplication(application);
+            auditCommentService.createAuditComment(AuditComment.builder()
                     .comment("Applied for opening successfully")
                     .auditLog(auditLog)
                     .build());
@@ -190,11 +194,11 @@ public class ApplicationController {
      */
     @PutMapping("/{id}")
     @Operation(summary = "Update application", description = "Update an existing application by its ID")
-    @ApiResponse(responseCode = "200", description = "Application updated successfully", content = @Content(schema = @Schema(implementation = DBApplication.class)))
+    @ApiResponse(responseCode = "200", description = "Application updated successfully", content = @Content(schema = @Schema(implementation = Application.class)))
     @ApiResponse(responseCode = "404", description = "Application not found")
-    public ResponseEntity<DBApplication> updateApplication(@PathVariable Long id, @RequestBody DBApplication application) {
+    public ResponseEntity<Application> updateApplication(@PathVariable Long id, @RequestBody Application application) {
         // Update an existing application by ID and return the updated application
-        DBApplication dbUpdatedApplication = applicationService.updateApplication(id, application);
+        Application dbUpdatedApplication = applicationService.updateApplication(id, application);
         return ResponseEntity.ok(dbUpdatedApplication);
     }
 
@@ -223,32 +227,32 @@ public class ApplicationController {
      */
     @PatchMapping("/applications/{applicationId}/status")
     @Operation(summary = "Update application status", description = "Update the status of an application based on newStatus")
-    @ApiResponse(responseCode = "200", description = "Application status updated successfully", content = @Content(schema = @Schema(implementation = Application.class)))
+    @ApiResponse(responseCode = "200", description = "Application status updated successfully", content = @Content(schema = @Schema(implementation = com.theja.projectallocationservice.dto.Application.class)))
     @ApiResponse(responseCode = "400", description = "Bad request")
     @ApiResponse(responseCode = "401", description = "Unauthorized")
     @ApiResponse(responseCode = "404", description = "Application not found")
-    public ResponseEntity<Application> updateInterviewStatus(@PathVariable Long applicationId, @RequestParam ApplicationStatus newStatus) {
+    public ResponseEntity<com.theja.projectallocationservice.dto.Application> updateInterviewStatus(@PathVariable Long applicationId, @RequestParam ApplicationStatus newStatus) {
         // Create Audit log
-        DBAuditLog auditLog = auditLogService.createAuditLog(
-                DBAuditLog.builder()
+        AuditLog auditLog = auditLogService.createAuditLog(
+                AuditLog.builder()
                         .action("Updating status of application id " + applicationId)
-                        .user(DBUser.builder().id(requestContext.getLoggedinUser().getId()).build())
+                        .user(User.builder().id(requestContext.getLoggedinUser().getId()).build())
                         .loggedAt(new Date())
                         .auditComments(new ArrayList<>())
                         .build());
-        auditCommentService.createAuditComment(DBAuditComment.builder()
+        auditCommentService.createAuditComment(AuditComment.builder()
                 .comment("Checking user permissions")
                 .auditLog(auditLog)
                 .build());
         if (requestContext.getPermissions() == null || !requestContext.getPermissions().contains(PermissionName.VIEW_PENDING_APPLICATIONS.toString())) {
-            auditCommentService.createAuditComment(DBAuditComment.builder()
+            auditCommentService.createAuditComment(AuditComment.builder()
                     .comment("Unauthorized user trying to update application status")
                     .auditLog(auditLog)
                     .build());
             throw new UnauthorizedAccessException("You don't have permission to update the application status.");
         }
-        DBApplication application = applicationService.getApplicationById(applicationId);
-        auditCommentService.createAuditComment(DBAuditComment.builder()
+        Application application = applicationService.getApplicationById(applicationId);
+        auditCommentService.createAuditComment(AuditComment.builder()
                 .comment("Application with " + applicationId + " found")
                 .auditLog(auditLog)
                 .build());
@@ -262,19 +266,19 @@ public class ApplicationController {
             }
             // Update the status of an application based on provided rules
             application.setStatus(newStatus);
-            DBApplication dbUpdatedApplication = applicationService.updateApplication(applicationId, application);
-            auditCommentService.createAuditComment(DBAuditComment.builder()
+            Application dbUpdatedApplication = applicationService.updateApplication(applicationId, application);
+            auditCommentService.createAuditComment(AuditComment.builder()
                     .comment("Updated the application status")
                     .auditLog(auditLog)
                     .build());
             if (newStatus != ApplicationStatus.REJECTED) {
                 projectService.allocateUser(dbUpdatedApplication.getOpening().getProject(), dbUpdatedApplication.getCandidate());
-                auditCommentService.createAuditComment(DBAuditComment.builder()
+                auditCommentService.createAuditComment(AuditComment.builder()
                         .comment("Application accepted and applicant is allocated to the project")
                         .auditLog(auditLog)
                         .build());
             } else {
-                auditCommentService.createAuditComment(DBAuditComment.builder()
+                auditCommentService.createAuditComment(AuditComment.builder()
                         .comment("Application rejected")
                         .auditLog(auditLog)
                         .build());

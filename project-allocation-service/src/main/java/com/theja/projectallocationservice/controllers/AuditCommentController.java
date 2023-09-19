@@ -1,7 +1,7 @@
 package com.theja.projectallocationservice.controllers;
 
 import com.theja.projectallocationservice.mappers.AuditCommentMapper;
-import com.theja.projectallocationservice.models.*;
+import com.theja.projectallocationservice.entities.*;
 import com.theja.projectallocationservice.repositories.AuditCommentRepository;
 import com.theja.projectallocationservice.services.AuditCommentService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -40,13 +40,13 @@ public class AuditCommentController {
      */
     @GetMapping("/audit-logs/{auditLogId}/comments")
     @Operation(summary = "Get audit comments by audit log ID", description = "Retrieve a list of audit comments associated with a specific audit log ID")
-    @ApiResponse(responseCode = "200", description = "Audit comments retrieved successfully", content = @Content(schema = @Schema(implementation = AuditComment.class)))
+    @ApiResponse(responseCode = "200", description = "Audit comments retrieved successfully", content = @Content(schema = @Schema(implementation = com.theja.projectallocationservice.dto.AuditComment.class)))
     @ApiResponse(responseCode = "404", description = "Audit log not found")
-    public ResponseEntity<List<AuditComment>> getAuditCommentsByAuditLogId(@PathVariable Long auditLogId) {
+    public ResponseEntity<List<com.theja.projectallocationservice.dto.AuditComment>> getAuditCommentsByAuditLogId(@PathVariable Long auditLogId) {
         // Fetch audit comments related to a specific audit log by ID
-        List<DBAuditComment> dbAuditComments = auditCommentService.getAuditCommentsByAuditLogId(auditLogId);
+        List<AuditComment> auditComments = auditCommentService.getAuditCommentsByAuditLogId(auditLogId);
         // Convert entity audit comments to model audit comments using the mapper
         // Return the list of model audit comments in the response
-        return new ResponseEntity<>(auditCommentMapper.entityToModel(dbAuditComments), HttpStatus.OK);
+        return new ResponseEntity<>(auditCommentMapper.entityToModel(auditComments), HttpStatus.OK);
     }
 }

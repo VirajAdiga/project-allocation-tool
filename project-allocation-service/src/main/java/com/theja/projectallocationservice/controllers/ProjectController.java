@@ -1,9 +1,13 @@
 package com.theja.projectallocationservice.controllers;
 
+import com.theja.projectallocationservice.dto.CreateProjectDTO;
+import com.theja.projectallocationservice.dto.ProjectListResponse;
+import com.theja.projectallocationservice.dto.RequestContext;
+import com.theja.projectallocationservice.entities.enums.PermissionName;
 import com.theja.projectallocationservice.exceptions.ResourceNotFoundException;
 import com.theja.projectallocationservice.exceptions.UnauthorizedAccessException;
 import com.theja.projectallocationservice.mappers.ProjectMapper;
-import com.theja.projectallocationservice.models.*;
+import com.theja.projectallocationservice.entities.*;
 import com.theja.projectallocationservice.services.AuditCommentService;
 import com.theja.projectallocationservice.services.AuditLogService;
 import com.theja.projectallocationservice.services.ProjectService;
@@ -58,7 +62,7 @@ public class ProjectController {
     public ResponseEntity<ProjectListResponse> getAllProjects(@RequestParam(required = false) Integer pageSize, @RequestParam(required = false) Integer pageNumber) {
         log.info("Request reached projects controller: with page size "+ pageSize + " with page number " + pageNumber);
         // Fetch all projects and return a list of project models with pagination details
-        Page<DBProject> dbProjects = projectService.getAllProjects(pageSize, pageNumber);
+        Page<Project> dbProjects = projectService.getAllProjects(pageSize, pageNumber);
         ProjectListResponse response = ProjectListResponse.builder()
                 .projects(projectMapper.entityToModel(dbProjects.getContent()))
                 .totalElements(dbProjects.getTotalElements())
@@ -74,10 +78,10 @@ public class ProjectController {
     @GetMapping("/projects/all")
     @Operation(summary = "Get all projects without pagination", description = "Retrieve a list of all projects without pagination")
     @ApiResponse(responseCode = "200", description = "Projects retrieved successfully", content = @Content(schema = @Schema(implementation = List.class)))
-    public ResponseEntity<List<Project>> getAllProjects() {
+    public ResponseEntity<List<com.theja.projectallocationservice.dto.Project>> getAllProjects() {
         // Fetch all projects without pagination and return a list of project models
-        List<DBProject> dbProjects = projectService.getAllProjectsWithoutPagination();
-        return ResponseEntity.ok(projectMapper.entityToModel(dbProjects));
+        List<Project> projects = projectService.getAllProjectsWithoutPagination();
+        return ResponseEntity.ok(projectMapper.entityToModel(projects));
     }
 
     /**
@@ -89,10 +93,10 @@ public class ProjectController {
     @GetMapping("/projects/users/{userId}")
     @Operation(summary = "Get projects for a user", description = "Retrieve a list of projects associated with a user")
     @ApiResponse(responseCode = "200", description = "Projects retrieved successfully", content = @Content(schema = @Schema(implementation = List.class)))
-    public ResponseEntity<List<Project>> getProjectsForUser(@PathVariable Long userId) {
+    public ResponseEntity<List<com.theja.projectallocationservice.dto.Project>> getProjectsForUser(@PathVariable Long userId) {
         // Fetch projects associated with a user and return a list of project models
-        List<DBProject> dbProjects = projectService.getProjectsForUser(userId);
-        return ResponseEntity.ok(projectMapper.entityToModel(dbProjects));
+        List<Project> projects = projectService.getProjectsForUser(userId);
+        return ResponseEntity.ok(projectMapper.entityToModel(projects));
     }
 
     /**
@@ -104,12 +108,12 @@ public class ProjectController {
     // Get a specific project by ID
     @GetMapping("/projects/{id}")
     @Operation(summary = "Get project by ID", description = "Retrieve a specific project by its ID")
-    @ApiResponse(responseCode = "200", description = "Project retrieved successfully", content = @Content(schema = @Schema(implementation = Project.class)))
-    public ResponseEntity<Project> getProjectById(@PathVariable("id") Long id) {
+    @ApiResponse(responseCode = "200", description = "Project retrieved successfully", content = @Content(schema = @Schema(implementation = com.theja.projectallocationservice.dto.Project.class)))
+    public ResponseEntity<com.theja.projectallocationservice.dto.Project> getProjectById(@PathVariable("id") Long id) {
         // Fetch a project by its ID and return it as a model
-        DBProject dbProject = projectService.getProjectById(id);
-        if (dbProject != null) {
-            return ResponseEntity.ok(projectMapper.entityToModel(dbProject));
+        Project project = projectService.getProjectById(id);
+        if (project != null) {
+            return ResponseEntity.ok(projectMapper.entityToModel(project));
         } else {
             throw new ResourceNotFoundException("Project not found with ID: " + id);
         }
@@ -124,35 +128,35 @@ public class ProjectController {
     // Create a new project
     @PostMapping("/projects")
     @Operation(summary = "Create project", description = "Create a new project")
-    @ApiResponse(responseCode = "201", description = "Project created successfully", content = @Content(schema = @Schema(implementation = Project.class)))
-    public ResponseEntity<Project> createProject(@RequestBody CreateProjectDTO projectDTO) {
+    @ApiResponse(responseCode = "201", description = "Project created successfully", content = @Content(schema = @Schema(implementation = com.theja.projectallocationservice.dto.Project.class)))
+    public ResponseEntity<com.theja.projectallocationservice.dto.Project> createProject(@RequestBody CreateProjectDTO projectDTO) {
         // Create an audit log for creating a project
-        DBAuditLog auditLog = auditLogService.createAuditLog(
-                DBAuditLog.builder()
+        AuditLog auditLog = auditLogService.createAuditLog(
+                AuditLog.builder()
                         .action("Creating project")
-                        .user(DBUser.builder().id(requestContext.getLoggedinUser().getId()).build())
+                        .user(User.builder().id(requestContext.getLoggedinUser().getId()).build())
                         .loggedAt(new Date())
                         .auditComments(new ArrayList<>())
                         .build());
-        auditCommentService.createAuditComment(DBAuditComment.builder()
+        auditCommentService.createAuditComment(AuditComment.builder()
                 .comment("Checking user permissions")
                 .auditLog(auditLog)
                 .build());
         // Check user permissions to create a project
         if (requestContext.getPermissions() == null || !requestContext.getPermissions().contains(PermissionName.CREATE_PROJECT.toString())) {
-            auditCommentService.createAuditComment(DBAuditComment.builder()
+            auditCommentService.createAuditComment(AuditComment.builder()
                     .comment("Unauthorized user trying to create project")
                     .auditLog(auditLog)
                     .build());
             throw new UnauthorizedAccessException("You don't have permission to create a project.");
         }
-        auditCommentService.createAuditComment(DBAuditComment.builder()
+        auditCommentService.createAuditComment(AuditComment.builder()
                 .comment("Permissions passed")
                 .auditLog(auditLog)
                 .build());
         // Create the project, save it, and return the response
-        DBProject dbCreatedProject = projectService.createProject(projectDTO);
-        auditCommentService.createAuditComment(DBAuditComment.builder()
+        Project dbCreatedProject = projectService.createProject(projectDTO);
+        auditCommentService.createAuditComment(AuditComment.builder()
                 .comment("Project created")
                 .auditLog(auditLog)
                 .build());
@@ -168,10 +172,10 @@ public class ProjectController {
     // Update an existing project
     @PutMapping("/projects/{id}")
     @Operation(summary = "Update project", description = "Update the details of an existing project")
-    @ApiResponse(responseCode = "200", description = "Project updated successfully", content = @Content(schema = @Schema(implementation = Project.class)))
-    public ResponseEntity<Project> updateProject(@PathVariable("id") Long id, @RequestBody DBProject dbProject) {
+    @ApiResponse(responseCode = "200", description = "Project updated successfully", content = @Content(schema = @Schema(implementation = com.theja.projectallocationservice.dto.Project.class)))
+    public ResponseEntity<com.theja.projectallocationservice.dto.Project> updateProject(@PathVariable("id") Long id, @RequestBody Project project) {
         // Update an existing project by ID, save the changes, and return the response
-        DBProject dbUpdatedProject = projectService.updateProject(id, dbProject);
+        Project dbUpdatedProject = projectService.updateProject(id, project);
         if (dbUpdatedProject != null) {
             return ResponseEntity.ok(projectMapper.entityToModel(dbUpdatedProject));
         } else {

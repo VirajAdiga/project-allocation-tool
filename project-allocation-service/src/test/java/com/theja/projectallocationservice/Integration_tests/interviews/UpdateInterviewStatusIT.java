@@ -1,8 +1,8 @@
 package com.theja.projectallocationservice.Integration_tests.interviews;
 
 import com.theja.projectallocationservice.config.RestTemplateConfig;
-import com.theja.projectallocationservice.models.Interview;
-import com.theja.projectallocationservice.models.InterviewStatus;
+import com.theja.projectallocationservice.dto.Interview;
+import com.theja.projectallocationservice.entities.enums.InterviewStatus;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

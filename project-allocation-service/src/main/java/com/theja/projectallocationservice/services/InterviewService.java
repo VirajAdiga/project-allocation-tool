@@ -2,7 +2,7 @@ package com.theja.projectallocationservice.services;
 
 import com.theja.projectallocationservice.exceptions.InterviewNotFoundException;
 import com.theja.projectallocationservice.exceptions.ResourceNotFoundException;
-import com.theja.projectallocationservice.models.DBInterview;
+import com.theja.projectallocationservice.entities.Interview;
 import com.theja.projectallocationservice.repositories.InterviewRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,7 +25,7 @@ public class InterviewService {
      * @return The interview with the specified ID.
      * @throws ResourceNotFoundException If the interview is not found.
      */
-    public DBInterview getInterviewById(Long id) {
+    public Interview getInterviewById(Long id) {
         return interviewRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Interview not found"));
     }
@@ -36,15 +36,15 @@ public class InterviewService {
      * @param interviewerId The ID of the interviewer for whom to retrieve interviews.
      * @return A list of DBInterview entities associated with the provided interviewer ID.
      */
-    public List<DBInterview> getInterviewsByInterviewerId(Long interviewerId) {
+    public List<Interview> getInterviewsByInterviewerId(Long interviewerId) {
         return interviewRepository.findByInterviewerId(interviewerId);
     }
 
-    public DBInterview updateInterviewFeedback(Long interviewId, String feedback) {
-        Optional<DBInterview> optionalInterview = interviewRepository.findById(interviewId);
+    public Interview updateInterviewFeedback(Long interviewId, String feedback) {
+        Optional<Interview> optionalInterview = interviewRepository.findById(interviewId);
 
         if (optionalInterview.isPresent()) {
-            DBInterview interview = optionalInterview.get();
+            Interview interview = optionalInterview.get();
             interview.setFeedback(feedback);
             return interviewRepository.save(interview);
         } else {
@@ -59,8 +59,8 @@ public class InterviewService {
      * @return A list of interviews associated with the application
      * @throws InterviewNotFoundException If no interviews are found for the given application ID
      */
-    public List<DBInterview> getInterviewsByApplicationId(Long applicationId) {
-        List<DBInterview> interviews = interviewRepository.findByApplicationId(applicationId);
+    public List<Interview> getInterviewsByApplicationId(Long applicationId) {
+        List<Interview> interviews = interviewRepository.findByApplicationId(applicationId);
 
         if (interviews.isEmpty()) {
             throw new InterviewNotFoundException("No interviews found for application ID: " + applicationId);
@@ -75,7 +75,7 @@ public class InterviewService {
      * @param interview The interview to create.
      * @return The created interview.
      */
-    public DBInterview createInterview(DBInterview interview) {
+    public Interview createInterview(Interview interview) {
         return interviewRepository.save(interview);
     }
 
@@ -87,8 +87,8 @@ public class InterviewService {
      * @return The updated interview.
      * @throws ResourceNotFoundException If the interview is not found.
      */
-    public DBInterview updateInterview(Long id, DBInterview interview) {
-        DBInterview existingInterview = getInterviewById(id);
+    public Interview updateInterview(Long id, Interview interview) {
+        Interview existingInterview = getInterviewById(id);
         // Update the properties of existingInterview with the properties from the provided interview
         existingInterview.setStatus(interview.getStatus());
         existingInterview.setScheduledTime(interview.getScheduledTime());

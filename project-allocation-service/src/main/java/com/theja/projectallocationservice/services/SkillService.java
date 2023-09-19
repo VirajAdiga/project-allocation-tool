@@ -1,6 +1,6 @@
 package com.theja.projectallocationservice.services;
 
-import com.theja.projectallocationservice.models.DBSkill;
+import com.theja.projectallocationservice.entities.Skill;
 import com.theja.projectallocationservice.repositories.SkillRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,7 +19,7 @@ public class SkillService {
      * @param skillId The ID of the skill to retrieve.
      * @return An Optional containing the retrieved skill, or an empty Optional if not found.
      */
-    public Optional<DBSkill> getSkillById(Long skillId) {
+    public Optional<Skill> getSkillById(Long skillId) {
         return skillRepository.findById(skillId);
     }
 
@@ -29,7 +29,7 @@ public class SkillService {
      * @param skill The skill to be created.
      * @return The created skill.
      */
-    public DBSkill createSkill(DBSkill skill) {
+    public Skill createSkill(Skill skill) {
         return skillRepository.save(skill);
     }
 
@@ -38,7 +38,7 @@ public class SkillService {
      *
      * @return A list containing all skills.
      */
-    public List<DBSkill> getAllSkills() {
+    public List<Skill> getAllSkills() {
         return skillRepository.findAll();
     }
 }

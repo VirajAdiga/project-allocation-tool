@@ -1,7 +1,6 @@
 package com.theja.projectallocationservice.mappers;
 
-import com.theja.projectallocationservice.models.DBOpening;
-import com.theja.projectallocationservice.models.Opening;
+import com.theja.projectallocationservice.entities.Opening;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -18,14 +17,14 @@ public class OpeningMapper {
     private UserMapper userMapper;
 
     // Convert a list of DBOpening entities to a list of Opening model objects
-    public List<Opening> entityToModel(List<DBOpening> dbOpenings) {
-        return dbOpenings.stream().map(this::entityToModel).collect(Collectors.toList());
+    public List<com.theja.projectallocationservice.dto.Opening> entityToModel(List<Opening> openings) {
+        return openings.stream().map(this::entityToModel).collect(Collectors.toList());
     }
 
     // Convert a DBOpening entity to an Opening model object
-    public Opening entityToModel(DBOpening dbOpening) {
+    public com.theja.projectallocationservice.dto.Opening entityToModel(Opening opening) {
         // Map the attributes of the DBOpening entity to the corresponding attributes of the Opening model
         // Note that the last argument (interviews) is set to null; this may be intentionally left for further processing
-        return new Opening(dbOpening.getId(), dbOpening.getTitle(), dbOpening.getDetails(), dbOpening.getLevel(), dbOpening.getLocation(), dbOpening.getStatus(), userMapper.entityToPublicModel(dbOpening.getRecruiter()), projectMapper.entityToModel(dbOpening.getProject()), null, skillMapper.entityToModel(dbOpening.getSkills()));
+        return new com.theja.projectallocationservice.dto.Opening(opening.getId(), opening.getTitle(), opening.getDetails(), opening.getLevel(), opening.getLocation(), opening.getStatus(), userMapper.entityToPublicModel(opening.getRecruiter()), projectMapper.entityToModel(opening.getProject()), null, skillMapper.entityToModel(opening.getSkills()));
     }
 }

@@ -1,8 +1,11 @@
 package com.theja.projectallocationservice.validation;
 
+import com.theja.projectallocationservice.dto.RequestContext;
+import com.theja.projectallocationservice.entities.enums.OpeningStatus;
+import com.theja.projectallocationservice.entities.enums.PermissionName;
 import com.theja.projectallocationservice.exceptions.SkillNotFoundException;
 import com.theja.projectallocationservice.exceptions.UnauthorizedAccessException;
-import com.theja.projectallocationservice.models.*;
+import com.theja.projectallocationservice.entities.*;
 import com.theja.projectallocationservice.services.AuditCommentService;
 import com.theja.projectallocationservice.services.AuditLogService;
 import com.theja.projectallocationservice.services.ProjectService;
@@ -26,66 +29,66 @@ public class OpeningValidationService {
     @Autowired
     private AuditCommentService auditCommentService;
 
-    public void validateCreateOpening(DBOpening dbOpening, Long projectId, RequestContext requestContext) {
-        DBAuditLog auditLog = createAuditLog(projectId, requestContext);
+    public void validateCreateOpening(Opening opening, Long projectId, RequestContext requestContext) {
+        AuditLog auditLog = createAuditLog(projectId, requestContext);
 
         checkUserPermissions(requestContext, auditLog);
 
-        assignProjectToOpening(dbOpening, projectId, auditLog);
-        assignSkillsToOpening(dbOpening, auditLog);
-        dbOpening.setStatus(OpeningStatus.ACTIVE);
+        assignProjectToOpening(opening, projectId, auditLog);
+        assignSkillsToOpening(opening, auditLog);
+        opening.setStatus(OpeningStatus.ACTIVE);
 
-        auditCommentService.createAuditComment(DBAuditComment.builder()
+        auditCommentService.createAuditComment(AuditComment.builder()
                 .comment("Opening validated")
                 .auditLog(auditLog)
                 .build());
     }
 
-    private DBAuditLog createAuditLog(Long projectId, RequestContext requestContext) {
-        DBAuditLog auditLog = auditLogService.createAuditLog(
-                DBAuditLog.builder()
+    private AuditLog createAuditLog(Long projectId, RequestContext requestContext) {
+        AuditLog auditLog = auditLogService.createAuditLog(
+                AuditLog.builder()
                         .action("Create Opening for project " + projectId)
-                        .user(DBUser.builder().id(requestContext.getLoggedinUser().getId()).build())
+                        .user(User.builder().id(requestContext.getLoggedinUser().getId()).build())
                         .loggedAt(new Date())
                         .auditComments(new ArrayList<>())
                         .build());
-        auditCommentService.createAuditComment(DBAuditComment.builder()
+        auditCommentService.createAuditComment(AuditComment.builder()
                 .comment("Checking user permissions")
                 .auditLog(auditLog)
                 .build());
         return auditLog;
     }
 
-    private void checkUserPermissions(RequestContext requestContext, DBAuditLog auditLog) {
+    private void checkUserPermissions(RequestContext requestContext, AuditLog auditLog) {
         if (requestContext.getPermissions() == null || !requestContext.getPermissions().contains(PermissionName.CREATE_OPENING.toString())) {
-            auditCommentService.createAuditComment(DBAuditComment.builder()
+            auditCommentService.createAuditComment(AuditComment.builder()
                     .comment("Unauthorized user trying to create opening")
                     .auditLog(auditLog)
                     .build());
             throw new UnauthorizedAccessException("You don't have permission to create an opening.");
         }
-        auditCommentService.createAuditComment(DBAuditComment.builder()
+        auditCommentService.createAuditComment(AuditComment.builder()
                 .comment("Permissions passed")
                 .auditLog(auditLog)
                 .build());
     }
 
-    private void assignProjectToOpening(DBOpening dbOpening, Long projectId, DBAuditLog auditLog) {
-        dbOpening.setProject(projectService.getProjectById(projectId));
-        auditCommentService.createAuditComment(DBAuditComment.builder()
+    private void assignProjectToOpening(Opening opening, Long projectId, AuditLog auditLog) {
+        opening.setProject(projectService.getProjectById(projectId));
+        auditCommentService.createAuditComment(AuditComment.builder()
                 .comment("Project mapped to opening")
                 .auditLog(auditLog)
                 .build());
     }
 
-    private void assignSkillsToOpening(DBOpening dbOpening, DBAuditLog auditLog) {
-        List<DBSkill> skills = new ArrayList<>();
-        for (DBSkill skill : dbOpening.getSkills()) {
+    private void assignSkillsToOpening(Opening opening, AuditLog auditLog) {
+        List<Skill> skills = new ArrayList<>();
+        for (Skill skill : opening.getSkills()) {
             skills.add(skillService.getSkillById(skill.getId())
                     .orElseThrow(() -> new SkillNotFoundException("Skill not found with ID: " + skill.getId())));
         }
-        dbOpening.setSkills(skills);
-        auditCommentService.createAuditComment(DBAuditComment.builder()
+        opening.setSkills(skills);
+        auditCommentService.createAuditComment(AuditComment.builder()
                 .comment("Skills assigned to opening")
                 .auditLog(auditLog)
                 .build());

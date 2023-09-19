@@ -1,8 +1,12 @@
 package com.theja.projectallocationservice.controllers;
 
+import com.theja.projectallocationservice.dto.OpeningsListResponse;
+import com.theja.projectallocationservice.dto.RequestContext;
+import com.theja.projectallocationservice.entities.enums.OpeningStatus;
+import com.theja.projectallocationservice.entities.enums.PermissionName;
 import com.theja.projectallocationservice.exceptions.*;
 import com.theja.projectallocationservice.mappers.OpeningMapper;
-import com.theja.projectallocationservice.models.*;
+import com.theja.projectallocationservice.entities.*;
 import com.theja.projectallocationservice.services.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -59,7 +63,7 @@ public class OpeningController {
     @ApiResponse(responseCode = "200", description = "Openings retrieved successfully", content = @Content(schema = @Schema(implementation = OpeningsListResponse.class)))
     public ResponseEntity<OpeningsListResponse> getAllOpenings(@RequestParam(required = false) Integer pageSize, @RequestParam(required = false) Integer pageNumber, @RequestParam(required = false) Boolean appliedBySelf, @RequestParam(required = false) Boolean postedBySelf) {
         // Fetch all openings and return a list of opening models with pagination details
-        Page<DBOpening> dbOpenings = openingService.getAllOpenings(pageSize, pageNumber, appliedBySelf, postedBySelf);
+        Page<Opening> dbOpenings = openingService.getAllOpenings(pageSize, pageNumber, appliedBySelf, postedBySelf);
         OpeningsListResponse response = OpeningsListResponse.builder()
                 .openings(openingMapper.entityToModel(dbOpenings.getContent()))
                 .totalElements(dbOpenings.getTotalElements())
@@ -77,10 +81,10 @@ public class OpeningController {
     @GetMapping("/projects/{projectId}/openings")
     @Operation(summary = "Get openings for a project", description = "Retrieve a list of openings for a specific project")
     @ApiResponse(responseCode = "200", description = "Openings retrieved successfully", content = @Content(schema = @Schema(implementation = List.class)))
-    public ResponseEntity<List<Opening>> getAllOpeningsForProject(@PathVariable Long projectId) {
+    public ResponseEntity<List<com.theja.projectallocationservice.dto.Opening>> getAllOpeningsForProject(@PathVariable Long projectId) {
         // Fetch openings for a specific project and return a list of opening models
-        List<DBOpening> dbOpenings = openingService.getAllOpeningsForProject(projectId);
-        return ResponseEntity.ok(openingMapper.entityToModel(dbOpenings));
+        List<Opening> openings = openingService.getAllOpeningsForProject(projectId);
+        return ResponseEntity.ok(openingMapper.entityToModel(openings));
     }
 
     /**
@@ -93,12 +97,12 @@ public class OpeningController {
     // Get a specific opening by ID
     @GetMapping("/openings/{id}")
     @Operation(summary = "Get opening by ID", description = "Retrieve a specific opening by its ID")
-    @ApiResponse(responseCode = "200", description = "Opening retrieved successfully", content = @Content(schema = @Schema(implementation = Opening.class)))
-    public ResponseEntity<Opening> getOpeningById(@PathVariable("id") Long id) {
+    @ApiResponse(responseCode = "200", description = "Opening retrieved successfully", content = @Content(schema = @Schema(implementation = com.theja.projectallocationservice.dto.Opening.class)))
+    public ResponseEntity<com.theja.projectallocationservice.dto.Opening> getOpeningById(@PathVariable("id") Long id) {
         // Fetch an opening by its ID and return it as a model
-        DBOpening dbOpening = openingService.getOpeningById(id);
-        if (dbOpening != null) {
-            return ResponseEntity.ok(openingMapper.entityToModel(dbOpening));
+        Opening opening = openingService.getOpeningById(id);
+        if (opening != null) {
+            return ResponseEntity.ok(openingMapper.entityToModel(opening));
         } else {
             throw new OpeningNotFoundException(id);
         }
@@ -107,7 +111,7 @@ public class OpeningController {
     /**
      * Creates a new opening for a specific project.
      *
-     * @param dbOpening  The opening details.
+     * @param opening  The opening details.
      * @param projectId  The ID of the project.
      * @return A response containing the details of the created opening.
      * @throws UnauthorizedAccessException If the user does not have permission to create an opening.
@@ -115,66 +119,66 @@ public class OpeningController {
      */
     @PostMapping("/projects/{projectId}/openings")
     @Operation(summary = "Create opening", description = "Create a new opening for a specific project")
-    @ApiResponse(responseCode = "201", description = "Opening created successfully", content = @Content(schema = @Schema(implementation = Opening.class)))
-    public ResponseEntity<Opening> createOpening(@RequestBody @Validated DBOpening dbOpening, @PathVariable Long projectId) {
+    @ApiResponse(responseCode = "201", description = "Opening created successfully", content = @Content(schema = @Schema(implementation = com.theja.projectallocationservice.dto.Opening.class)))
+    public ResponseEntity<com.theja.projectallocationservice.dto.Opening> createOpening(@RequestBody @Validated Opening opening, @PathVariable Long projectId) {
         // Create an audit log for creating an opening
-        DBAuditLog auditLog = auditLogService.createAuditLog(
-                DBAuditLog.builder()
+        AuditLog auditLog = auditLogService.createAuditLog(
+                AuditLog.builder()
                         .action("Create Opening for project " + projectId)
-                        .user(DBUser.builder().id(requestContext.getLoggedinUser().getId()).build())
+                        .user(User.builder().id(requestContext.getLoggedinUser().getId()).build())
                         .loggedAt(new Date())
                         .auditComments(new ArrayList<>())
                         .build());
-        auditCommentService.createAuditComment(DBAuditComment.builder()
+        auditCommentService.createAuditComment(AuditComment.builder()
                         .comment("Checking user permissions")
                         .auditLog(auditLog)
                 .build());
         // Check user permissions to create an opening
         if (requestContext.getPermissions() == null || !requestContext.getPermissions().contains(PermissionName.CREATE_OPENING.toString())) {
-            auditCommentService.createAuditComment(DBAuditComment.builder()
+            auditCommentService.createAuditComment(AuditComment.builder()
                     .comment("Unauthorized user trying to create opening")
                     .auditLog(auditLog)
                     .build());
             throw new UnauthorizedAccessException("You don't have permission to create an opening.");
         }
-        auditCommentService.createAuditComment(DBAuditComment.builder()
+        auditCommentService.createAuditComment(AuditComment.builder()
                 .comment("Permissions passed")
                 .auditLog(auditLog)
                 .build());
-        auditCommentService.createAuditComment(DBAuditComment.builder()
+        auditCommentService.createAuditComment(AuditComment.builder()
                 .comment("Checking if opening is duplicate")
                 .auditLog(auditLog)
                 .build());
         // Check if a duplicate opening with the same attributes already exists for the given project
-        if (openingService.isDuplicateOpening(dbOpening, projectId)) {
+        if (openingService.isDuplicateOpening(opening, projectId)) {
             throw new OpeningAlreadyExistsException("An opening with the same attributes already exists for the project.");
         }
-        auditCommentService.createAuditComment(DBAuditComment.builder()
+        auditCommentService.createAuditComment(AuditComment.builder()
                 .comment("Opening is unique")
                 .auditLog(auditLog)
                 .build());
         // Map the opening to a project and validate skills
-        dbOpening.setProject(projectService.getProjectById(projectId));
-        auditCommentService.createAuditComment(DBAuditComment.builder()
+        opening.setProject(projectService.getProjectById(projectId));
+        auditCommentService.createAuditComment(AuditComment.builder()
                 .comment("Project mapped to opening")
                 .auditLog(auditLog)
                 .build());
         // Retrieve the Skill entities from the database using the provided skillIds
-        List<DBSkill> skills = new ArrayList<>();
-        for (DBSkill skill : dbOpening.getSkills()) {
+        List<Skill> skills = new ArrayList<>();
+        for (Skill skill : opening.getSkills()) {
             skills.add(skillService.getSkillById(skill.getId())
                     .orElseThrow(() -> new SkillNotFoundException("Skill not found with ID: " + skill.getId())));
         }
-        dbOpening.setSkills(skills);
-        auditCommentService.createAuditComment(DBAuditComment.builder()
+        opening.setSkills(skills);
+        auditCommentService.createAuditComment(AuditComment.builder()
                 .comment("Skills assigned to opening")
                 .auditLog(auditLog)
                 .build());
         // Set the opening status, create it, and return the response
-        dbOpening.setStatus(OpeningStatus.ACTIVE);
-        DBOpening dbCreatedOpening = openingService.createOpening(dbOpening);
-        Opening createdOpening = openingMapper.entityToModel(dbCreatedOpening);
-        auditCommentService.createAuditComment(DBAuditComment.builder()
+        opening.setStatus(OpeningStatus.ACTIVE);
+        Opening dbCreatedOpening = openingService.createOpening(opening);
+        com.theja.projectallocationservice.dto.Opening createdOpening = openingMapper.entityToModel(dbCreatedOpening);
+        auditCommentService.createAuditComment(AuditComment.builder()
                 .comment("Opening created")
                 .auditLog(auditLog)
                 .build());
@@ -185,7 +189,7 @@ public class OpeningController {
      * Updates the details of an existing opening.
      *
      * @param id        The ID of the opening to update.
-     * @param dbOpening The updated opening details.
+     * @param opening The updated opening details.
      * @return A response containing the updated opening details.
      * @throws UnauthorizedAccessException If the user does not have permission to update an opening.
      * @throws OpeningNotFoundException    If the opening with the given ID is not found.
@@ -193,90 +197,90 @@ public class OpeningController {
      */
     @PutMapping("/openings/{id}")
     @Operation(summary = "Update opening", description = "Update the details of an existing opening")
-    @ApiResponse(responseCode = "200", description = "Opening updated successfully", content = @Content(schema = @Schema(implementation = Opening.class)))
-    public ResponseEntity<Opening> updateOpening(
+    @ApiResponse(responseCode = "200", description = "Opening updated successfully", content = @Content(schema = @Schema(implementation = com.theja.projectallocationservice.dto.Opening.class)))
+    public ResponseEntity<com.theja.projectallocationservice.dto.Opening> updateOpening(
             @PathVariable("id") Long id,
-            @RequestBody DBOpening dbOpening) {
+            @RequestBody Opening opening) {
         // Create an audit log for updating an opening
-        DBAuditLog auditLog = auditLogService.createAuditLog(
-                DBAuditLog.builder()
+        AuditLog auditLog = auditLogService.createAuditLog(
+                AuditLog.builder()
                         .action("Update Opening " + id)
-                        .user(DBUser.builder().id(requestContext.getLoggedinUser().getId()).build())
+                        .user(User.builder().id(requestContext.getLoggedinUser().getId()).build())
                         .loggedAt(new Date())
                         .auditComments(new ArrayList<>())
                         .build());
-        auditCommentService.createAuditComment(DBAuditComment.builder()
+        auditCommentService.createAuditComment(AuditComment.builder()
                 .comment("Checking user permissions")
                 .auditLog(auditLog)
                 .build());
         // Check user permissions to update an opening
         if (requestContext.getPermissions() == null || !requestContext.getPermissions().contains(PermissionName.MANAGE_OPENINGS.toString())) {
-            auditCommentService.createAuditComment(DBAuditComment.builder()
+            auditCommentService.createAuditComment(AuditComment.builder()
                     .comment("Unauthorized user trying to create opening")
                     .auditLog(auditLog)
                     .build());
             throw new UnauthorizedAccessException("You don't have permission to create an opening.");
         }
         // Fetch the existing opening and update its properties
-        DBOpening existingOpening = openingService.getOpeningById(id);
+        Opening existingOpening = openingService.getOpeningById(id);
         if (existingOpening == null) {
             throw new OpeningNotFoundException(id);
         }
-        auditCommentService.createAuditComment(DBAuditComment.builder()
+        auditCommentService.createAuditComment(AuditComment.builder()
                 .comment("Opening with " + id + " found")
                 .auditLog(auditLog)
                 .build());
         // Update the properties of the existingOpening with the new values from the request payload
-        existingOpening.setTitle(dbOpening.getTitle());
-        existingOpening.setDetails(dbOpening.getDetails());
-        existingOpening.setLevel(dbOpening.getLevel());
-        existingOpening.setLocation(dbOpening.getLocation());
-        existingOpening.setStatus(dbOpening.getStatus());
-        existingOpening.setSkills(dbOpening.getSkills());
-        auditCommentService.createAuditComment(DBAuditComment.builder()
+        existingOpening.setTitle(opening.getTitle());
+        existingOpening.setDetails(opening.getDetails());
+        existingOpening.setLevel(opening.getLevel());
+        existingOpening.setLocation(opening.getLocation());
+        existingOpening.setStatus(opening.getStatus());
+        existingOpening.setSkills(opening.getSkills());
+        auditCommentService.createAuditComment(AuditComment.builder()
                 .comment("Updated opening with new values")
                 .auditLog(auditLog)
                 .build());
         // Save the updated opening
-        DBOpening updatedOpening = openingService.updateOpening(id, existingOpening);
+        Opening updatedOpening = openingService.updateOpening(id, existingOpening);
         if (updatedOpening == null) {
             throw new OpeningUpdateException("Failed to update the opening with ID: " + id);
         }
-        auditCommentService.createAuditComment(DBAuditComment.builder()
+        auditCommentService.createAuditComment(AuditComment.builder()
                 .comment("Opening updated")
                 .auditLog(auditLog)
                 .build());
         // Return the updated opening in the response
-        Opening responseOpening = openingMapper.entityToModel(updatedOpening);
+        com.theja.projectallocationservice.dto.Opening responseOpening = openingMapper.entityToModel(updatedOpening);
         return ResponseEntity.ok(responseOpening);
     }
 
     // Update opening status
     @PatchMapping("/openings/{id}/status")
     @Operation(summary = "Update opening status", description = "Update the status of an existing opening")
-    @ApiResponse(responseCode = "200", description = "Opening status updated successfully", content = @Content(schema = @Schema(implementation = Opening.class)))
-    public ResponseEntity<Opening> updateOpeningStatus(@PathVariable Long id, @RequestParam OpeningStatus newStatus) {
+    @ApiResponse(responseCode = "200", description = "Opening status updated successfully", content = @Content(schema = @Schema(implementation = com.theja.projectallocationservice.dto.Opening.class)))
+    public ResponseEntity<com.theja.projectallocationservice.dto.Opening> updateOpeningStatus(@PathVariable Long id, @RequestParam OpeningStatus newStatus) {
         // Fetch the opening by ID and update its status
-        DBOpening opening = openingService.getOpeningById(id);
+        Opening opening = openingService.getOpeningById(id);
         if (opening != null) {
             OpeningStatus currentStatus = opening.getStatus();
 
             if (currentStatus == OpeningStatus.ACTIVE) {
                 if (newStatus == OpeningStatus.PENDING || newStatus == OpeningStatus.CLOSED) {
                     opening.setStatus(newStatus);
-                    DBOpening dbUpdatedOpening = openingService.updateOpening(id, opening);
+                    Opening dbUpdatedOpening = openingService.updateOpening(id, opening);
                     return ResponseEntity.ok(openingMapper.entityToModel(dbUpdatedOpening));
                 }
             } else if (currentStatus == OpeningStatus.PENDING) {
                 if (newStatus == OpeningStatus.ACTIVE || newStatus == OpeningStatus.CLOSED) {
                     opening.setStatus(newStatus);
-                    DBOpening dbUpdatedOpening = openingService.updateOpening(id, opening);
+                    Opening dbUpdatedOpening = openingService.updateOpening(id, opening);
                     return ResponseEntity.ok(openingMapper.entityToModel(dbUpdatedOpening));
                 }
             } else if (currentStatus == OpeningStatus.CLOSED) {
                 if (newStatus == OpeningStatus.CLOSED) {
                     opening.setStatus(newStatus);
-                    DBOpening dbUpdatedOpening = openingService.updateOpening(id, opening);
+                    Opening dbUpdatedOpening = openingService.updateOpening(id, opening);
                     return ResponseEntity.ok(openingMapper.entityToModel(dbUpdatedOpening));
                 }
             }

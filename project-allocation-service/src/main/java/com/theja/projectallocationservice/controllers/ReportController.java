@@ -1,8 +1,12 @@
 package com.theja.projectallocationservice.controllers;
 
+import com.theja.projectallocationservice.dto.AllocatedPoolUserResponse;
+import com.theja.projectallocationservice.dto.FreePoolUserResponse;
+import com.theja.projectallocationservice.dto.RequestContext;
+import com.theja.projectallocationservice.entities.enums.PermissionName;
 import com.theja.projectallocationservice.exceptions.UnauthorizedAccessException;
 import com.theja.projectallocationservice.mappers.UserMapper;
-import com.theja.projectallocationservice.models.*;
+import com.theja.projectallocationservice.entities.*;
 import com.theja.projectallocationservice.services.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -53,7 +57,7 @@ public class ReportController {
             throw new UnauthorizedAccessException("You don't have permission to access any reports.");
         }
         // Fetch free pool users and return the response with pagination details
-        Page<DBUser> dbUsers = userService.getFreePoolUsers(pageSize, pageNumber);
+        Page<User> dbUsers = userService.getFreePoolUsers(pageSize, pageNumber);
         FreePoolUserResponse response = FreePoolUserResponse.builder()
                 .freePoolUsers(userMapper.entityToPublicModel(dbUsers.getContent()))
                 .totalElements(dbUsers.getTotalElements())
@@ -83,7 +87,7 @@ public class ReportController {
         // Parse the provided date range
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
         // Fetch allocated users within the date range and return the response with pagination details
-        Page<DBUser> dbUsers = userService.getAllAllocatedUsers(formatter.parse(startDate), formatter.parse(endDate), pageSize, pageNumber);
+        Page<User> dbUsers = userService.getAllAllocatedUsers(formatter.parse(startDate), formatter.parse(endDate), pageSize, pageNumber);
         AllocatedPoolUserResponse response = AllocatedPoolUserResponse.builder()
                 .allocatedUsers(userMapper.entityToPublicModel(dbUsers.getContent()))
                 .totalElements(dbUsers.getTotalElements())

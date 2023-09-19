@@ -1,7 +1,6 @@
 package com.theja.projectallocationservice.mappers;
 
-import com.theja.projectallocationservice.models.Application;
-import com.theja.projectallocationservice.models.DBApplication;
+import com.theja.projectallocationservice.entities.Application;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -17,13 +16,13 @@ public class ApplicationMapper {
     private OpeningMapper openingMapper;
 
     // Convert a list of DBApplication entities to a list of Application model objects
-    public List<Application> entityToModel(List<DBApplication> dbApplications) {
-        return dbApplications.stream().map(this::entityToModel).collect(Collectors.toList());
+    public List<com.theja.projectallocationservice.dto.Application> entityToModel(List<Application> applications) {
+        return applications.stream().map(this::entityToModel).collect(Collectors.toList());
     }
 
     // Convert a DBApplication entity to an Application model object
-    public Application entityToModel(DBApplication dbApplication) {
+    public com.theja.projectallocationservice.dto.Application entityToModel(Application application) {
         // Map the attributes of the DBApplication entity to the corresponding attributes of the Application model
-        return new Application(dbApplication.getId(), dbApplication.getStatus(), dbApplication.getAppliedAt(), userMapper.entityToPublicModel(dbApplication.getCandidate()), openingMapper.entityToModel(dbApplication.getOpening()), null);
+        return new com.theja.projectallocationservice.dto.Application(application.getId(), application.getStatus(), application.getAppliedAt(), userMapper.entityToPublicModel(application.getCandidate()), openingMapper.entityToModel(application.getOpening()), null);
     }
 }

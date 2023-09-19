@@ -1,8 +1,6 @@
 package com.theja.projectallocationservice.repositories;
 
-import com.theja.projectallocationservice.models.DBOpening;
-import com.theja.projectallocationservice.models.DBSkill;
-import com.theja.projectallocationservice.models.DBUser;
+import com.theja.projectallocationservice.entities.Opening;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,7 +14,7 @@ import java.util.List;
  * Repository interface for managing database operations related to openings.
  */
 @Repository
-public interface OpeningRepository extends JpaRepository<DBOpening, Long> {
+public interface OpeningRepository extends JpaRepository<Opening, Long> {
 
     /**
      * Retrieves a list of openings associated with a specific project.
@@ -24,7 +22,7 @@ public interface OpeningRepository extends JpaRepository<DBOpening, Long> {
      * @param projectId The ID of the project.
      * @return A list of openings associated with the project.
      */
-    List<DBOpening> findByProjectId(Long projectId);
+    List<Opening> findByProjectId(Long projectId);
 
     /**
      * Retrieves a pageable list of openings based on appliedBy and postedBy conditions.
@@ -40,7 +38,7 @@ public interface OpeningRepository extends JpaRepository<DBOpening, Long> {
             "            OR o.id not in (SELECT op.id FROM openings op JOIN applications ap ON ap.opening_id = op.id WHERE ap.candidate_id = :loggedinUserId))))\n" +
             "    AND ((:postedBy IS null) OR (:postedBy IS TRUE AND o.created_by = :loggedinUserId) OR (:postedBy IS FALSE AND o.created_by != :loggedinUserId))",
             nativeQuery = true, countProjection = "*")
-    Page<DBOpening> fetchOpenings(Boolean appliedBy, Boolean postedBy, Pageable pageable, Long loggedinUserId);
+    Page<Opening> fetchOpenings(Boolean appliedBy, Boolean postedBy, Pageable pageable, Long loggedinUserId);
 
     /**
      * Checks if an opening with the same combination of attributes exists for the specified project.
