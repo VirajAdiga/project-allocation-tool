@@ -30,9 +30,9 @@ public class UserServiceImpl implements UserService {
 
     // Retrieve a user by their email.
     @Override
-    public Optional<DBUser> getUser(String email) {
+    public Optional<User> getUser(String email) {
         log.info("Fetching user {}", email);
-        Optional<DBUser> userOptional = userRepository.findByEmail(email);
+        Optional<User> userOptional = userRepository.findByEmail(email);
         if (!userOptional.isPresent()) {
             throw new ResourceNotFoundException("User not found with email: " + email);
         }
@@ -43,12 +43,12 @@ public class UserServiceImpl implements UserService {
     @Override
     public void deleteUser(Integer userId) {
         // Retrieve the user by userId
-        Optional<DBUser> optionalUser = userRepository.findById(userId);
+        Optional<User> optionalUser = userRepository.findById(userId);
 
         // Check if the user exists
         if (optionalUser.isPresent()) {
             // Delete the user
-            DBUser user = optionalUser.get();
+            User user = optionalUser.get();
             userRepository.delete(user);
         } else {
             throw new ResourceNotFoundException("User not found with id: " + userId);
@@ -57,11 +57,11 @@ public class UserServiceImpl implements UserService {
 
     // Update a user's information by userId.
     @Override
-    public DBUser updateUser(Integer userId, DBUser updatedUser) {
-        Optional<DBUser> optionalUser = userRepository.findById(userId);
+    public User updateUser(Integer userId, User updatedUser) {
+        Optional<User> optionalUser = userRepository.findById(userId);
 
         if (optionalUser.isPresent()) {
-            DBUser existingUser = optionalUser.get();
+            User existingUser = optionalUser.get();
 
             // Apply partial updates only for the fields that are provided in updatedUser
             if (updatedUser.getName() != null) {
@@ -91,7 +91,7 @@ public class UserServiceImpl implements UserService {
 
     // Retrieve a paginated list of all users.
     @Override
-    public Page<DBUser> getAllUsers(Integer pageSize, Integer pageNumber) {
+    public Page<User> getAllUsers(Integer pageSize, Integer pageNumber) {
         if (pageSize == null) pageSize = 1000;
         if (pageNumber == null) pageNumber = 0;
         PageRequest pageRequest = PageRequest.of(pageNumber, pageSize);
@@ -100,23 +100,23 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Optional<DBUser> getUserById(Integer userId) {
+    public Optional<User> getUserById(Integer userId) {
         return userRepository.findById(userId);
     }
 
     @Override
-    public DBUser createUser(DBUser newUser) {
+    public User createUser(User newUser) {
         return userRepository.save(newUser);
     }
 
     @Override
-    public List<DBUser> getAllInterviewers() {
+    public List<User> getAllInterviewers() {
         return userRepository.findByIsInterviewerTrue();
     }
 
     @Override
     public void partialUpdateUser(Integer userId, UpdateUserRequest updateUserRequest) {
-        DBUser existingUser = userRepository.findById(userId)
+        User existingUser = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         if (updateUserRequest.getName() != null) {
@@ -134,7 +134,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void partialUpdateAdminUser(Integer userId, PublicUser publicUser) {
-        DBUser existingUser = userRepository.findById(userId)
+        User existingUser = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         if (publicUser.getName() != null) {
             existingUser.setName(publicUser.getName());

@@ -1,6 +1,6 @@
 package com.project.userservice.repositories;
 
-import com.project.userservice.entities.DBUser;
+import com.project.userservice.entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -12,7 +12,7 @@ import java.util.Optional;
  */
 @Repository
 // Repository interface for managing DBUser entities.
-public interface UserRepository extends JpaRepository<DBUser, Integer> {
+public interface UserRepository extends JpaRepository<User, Integer> {
 
    /**
     * Custom method to find a user by email.
@@ -20,7 +20,7 @@ public interface UserRepository extends JpaRepository<DBUser, Integer> {
     * @param email The email of the user to find.
     * @return An optional containing the user if found.
     */
-   Optional<DBUser> findByEmail(Object email);
+   Optional<User> findByEmail(Object email);
 
-   List<DBUser> findByIsInterviewerTrue(); // Custom query to retrieve users with is_interviewer = true
+   List<User> findByIsInterviewerTrue(); // Custom query to retrieve users with is_interviewer = true
 }

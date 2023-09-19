@@ -38,7 +38,7 @@ public class AuthorizationController {
     @Operation(summary = "Get user permissions", description = "Retrieve a list of permissions associated with the authenticated user's role")
     @ApiResponse(responseCode = "200", description = "List of user permissions retrieved successfully", content = @Content(array = @ArraySchema(schema = @Schema(implementation = PermissionName.class))))
     public List<PermissionName> getPermissions() {
-        DBUser user = (DBUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         // Determine the user's role and return the appropriate list of permissions.
         switch (user.getRole()) {
@@ -61,7 +61,7 @@ public class AuthorizationController {
     @Operation(summary = "Get user role", description = "Retrieve the role of the authenticated user")
     @ApiResponse(responseCode = "200", description = "User role retrieved successfully", content = @Content(schema = @Schema(implementation = Role.class)))
     public Role getRole() {
-        DBUser user = (DBUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return user.getRole();
     }
 
@@ -74,7 +74,7 @@ public class AuthorizationController {
     @Operation(summary = "Get authenticated user", description = "Retrieve a public representation of the authenticated user's information")
     @ApiResponse(responseCode = "200", description = "Authenticated user information retrieved successfully", content = @Content(schema = @Schema(implementation = PublicUser.class)))
     public PublicUser getUser() {
-        DBUser user = (DBUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         // Use the user mapper to convert the DBUser entity to a PublicUser model.
         return userMapper.entityToPublicModel(user);

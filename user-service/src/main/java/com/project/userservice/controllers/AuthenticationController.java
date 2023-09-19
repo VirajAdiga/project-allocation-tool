@@ -4,7 +4,7 @@ import com.project.userservice.dto.AuthenticationRequest;
 import com.project.userservice.services.AuthenticationService;
 import com.project.userservice.services.AuthorizationService;
 import com.project.userservice.dto.RegisterRequest;
-import com.project.userservice.entities.DBUser;
+import com.project.userservice.entities.User;
 import com.project.userservice.services.UserService;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
@@ -46,7 +46,7 @@ public class AuthenticationController {
     public ResponseEntity<String> register(
             @RequestBody RegisterRequest request
     ) {
-        DBUser createdUser = authenticationService.register(request);
+        User createdUser = authenticationService.register(request);
 
         // Generate the JWT token for the created user
         String token = authorizationService.generateJWTTokenForUser(createdUser);
@@ -74,7 +74,7 @@ public class AuthenticationController {
     public ResponseEntity<String> authenticate(
             @RequestBody AuthenticationRequest request, HttpServletResponse response
     ) {
-        DBUser existingUser = authenticationService.authenticate(request);
+        User existingUser = authenticationService.authenticate(request);
 
         // Generate the JWT token for the created user
         String token = authorizationService.generateJWTTokenForUser(existingUser);

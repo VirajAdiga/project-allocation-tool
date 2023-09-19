@@ -13,12 +13,12 @@ import java.util.List;
 @Entity
 @Table(name = "skills")
 // Entity class representing a skill in the database.
-public class DBSkill {
+public class Skill {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id; // Unique identifier for the skill.
     private String title; // Title/name of the skill.
 
     @ManyToMany(mappedBy = "skills")
-    private List<DBUser> users; // List of users associated with this skill.
+    private List<User> users; // List of users associated with this skill.
 }

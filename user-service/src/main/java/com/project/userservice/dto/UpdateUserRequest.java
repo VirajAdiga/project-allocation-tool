@@ -1,6 +1,6 @@
 package com.project.userservice.dto;
 
-import com.project.userservice.entities.DBSkill;
+import com.project.userservice.entities.Skill;
 import lombok.Data;
 
 import java.util.List;
@@ -9,5 +9,5 @@ import java.util.List;
 public class UpdateUserRequest {
     private String name;
     private String email;
-    private List<DBSkill> skills; // Add this field for skills
+    private List<Skill> skills; // Add this field for skills
 }

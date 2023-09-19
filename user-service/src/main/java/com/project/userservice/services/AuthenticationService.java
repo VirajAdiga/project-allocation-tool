@@ -3,7 +3,7 @@ package com.project.userservice.services;
 import com.project.userservice.dto.RegisterRequest;
 import com.project.userservice.dto.AuthenticationRequest;
 import com.project.userservice.exception.UserRegistrationException;
-import com.project.userservice.entities.DBUser;
+import com.project.userservice.entities.User;
 import com.project.userservice.repositories.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -32,15 +32,15 @@ public class AuthenticationService {
      * @return The registered user with updated information.
      * @throws UserRegistrationException If the provided email is already registered.
      */
-    public DBUser register(RegisterRequest request) {
+    public User register(RegisterRequest request) {
         // Check if user with the given email already exists
-        Optional<DBUser> existingUser = userRepository.findByEmail(request.getEmail());
+        Optional<User> existingUser = userRepository.findByEmail(request.getEmail());
         if (existingUser.isPresent()) {
             throw new UserRegistrationException("This email address is already registered");
         }
 
         // Create a new DBUser instance with the provided registration details.
-        var user = DBUser.builder()
+        var user = User.builder()
                 .name(request.getName())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
@@ -61,9 +61,9 @@ public class AuthenticationService {
      * @return The authenticated user if successful.
      * @throws RuntimeException If authentication fails.
      */
-    public DBUser authenticate(AuthenticationRequest request) {
+    public User authenticate(AuthenticationRequest request) {
         // Retrieve the user based on the provided email from the repository.
-        DBUser user = userRepository.findByEmail(request.getEmail())
+        User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow();
 
         // Compare the provided password with the encoded password in the user object.
@@ -92,7 +92,7 @@ public class AuthenticationService {
         userEmail = jwtService.extractSubject(jwt);
         if (userEmail != null) {
             // Fetch the user from the database using the email
-            DBUser user = userRepository.findByEmail(userEmail)
+            User user = userRepository.findByEmail(userEmail)
                     .orElseThrow(() -> new RuntimeException("User not found with email: " + userEmail));
 
             // Update the user's token to null to perform logout.
@@ -104,4 +104,3 @@ public class AuthenticationService {
         response.setHeader("Authorization", "");
     }
 }
-

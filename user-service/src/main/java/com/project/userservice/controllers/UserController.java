@@ -42,8 +42,8 @@ public class UserController {
      */
     @PostMapping
     @Hidden
-    public ResponseEntity<PublicUser> createUser(@RequestBody DBUser newUser) {
-        DBUser createdUser = userService.createUser(newUser);
+    public ResponseEntity<PublicUser> createUser(@RequestBody User newUser) {
+        User createdUser = userService.createUser(newUser);
         return ResponseEntity.ok(userMapper.entityToPublicModel(createdUser));
     }
 
@@ -79,7 +79,7 @@ public class UserController {
     @Operation(summary = "Get all users", description = "Retrieve a paginated list of users with optional pageSize and pageNumber parameters")
     @ApiResponse(responseCode = "200", description = "List of users retrieved successfully", content = @Content(schema = @Schema(implementation = UserListResponse.class)))
     public ResponseEntity<UserListResponse> getAllUsers(@RequestParam(required = false) Integer pageSize, @RequestParam(required = false) Integer pageNumber) {
-        Page<DBUser> dbUsers = userService.getAllUsers(pageSize, pageNumber);
+        Page<User> dbUsers = userService.getAllUsers(pageSize, pageNumber);
         System.out.println(dbUsers);
         UserListResponse response = UserListResponse.builder()
                 .users(userMapper.entityToPublicModel(dbUsers.getContent()))
@@ -97,8 +97,8 @@ public class UserController {
     @Operation(summary = "Get interviewers", description = "Retrieve a list of all users without pagination, specifically for interviewers")
     @ApiResponse(responseCode = "200", description = "List of interviewers retrieved successfully", content = @Content(array = @ArraySchema(schema = @Schema(implementation = PublicUser.class))))
     public ResponseEntity<List<PublicUser>> getAllInterviewers() {
-        List<DBUser> dbUsers = userService.getAllInterviewers();
-        return ResponseEntity.ok(userMapper.entityToPublicModel(dbUsers));
+        List<User> users = userService.getAllInterviewers();
+        return ResponseEntity.ok(userMapper.entityToPublicModel(users));
     }
 
     /**

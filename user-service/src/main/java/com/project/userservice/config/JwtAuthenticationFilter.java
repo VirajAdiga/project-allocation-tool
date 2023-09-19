@@ -1,6 +1,6 @@
 package com.project.userservice.config;
 
-import com.project.userservice.entities.DBUser;
+import com.project.userservice.entities.User;
 import com.project.userservice.repositories.UserRepository;
 import com.project.userservice.services.JwtService;
 import jakarta.servlet.FilterChain;
@@ -76,7 +76,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter implements Ord
         userEmail = jwtService.extractSubject(jwt);
 
         if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            DBUser user = userRepository.findByEmail(userEmail).orElseThrow(RuntimeException::new);
+            User user = userRepository.findByEmail(userEmail).orElseThrow(RuntimeException::new);
             String storedToken = user.getToken(); // Retrieve the token from the user object
 
             // Validate the token and ensure it matches the stored token.

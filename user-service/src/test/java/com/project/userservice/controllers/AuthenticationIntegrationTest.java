@@ -1,7 +1,7 @@
 package com.project.userservice.controllers;
 
 import com.project.userservice.config.JwtAuthenticationFilter;
-import com.project.userservice.entities.DBUser;
+import com.project.userservice.entities.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +44,7 @@ public class AuthenticationIntegrationTest {
     @Test
     public void testAuthentication() throws Exception {
         // Create a user in the database with the encoded password
-        DBUser testUser = new DBUser();
+        User testUser = new User();
         testUser.setEmail("admin@gmail.com");
         testUser.setPassword(encodedPassword);
         // Set other required fields

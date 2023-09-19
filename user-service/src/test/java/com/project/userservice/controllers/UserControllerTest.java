@@ -1,7 +1,7 @@
     package com.project.userservice.controllers;
 
     import com.project.userservice.mappers.UserMapper;
-    import com.project.userservice.entities.DBUser;
+    import com.project.userservice.entities.User;
     import com.project.userservice.dto.PublicUser;
     import com.project.userservice.entities.enums.Role;
     import com.project.userservice.services.UserService;
@@ -43,11 +43,11 @@
             objectMapper = new ObjectMapper();
 
             // Mocking getAllUsers with pagination
-            List<DBUser> dbUsersWithPagination = Arrays.asList(
-                    new DBUser(1, "User1", "user1@example.com", "password", Role.EMPLOYEE, null, false, null),
-                    new DBUser(2, "User2", "user2@example.com", "password", Role.EMPLOYEE, null, false, null)
+            List<User> usersWithPagination = Arrays.asList(
+                    new User(1, "User1", "user1@example.com", "password", Role.EMPLOYEE, null, false, null),
+                    new User(2, "User2", "user2@example.com", "password", Role.EMPLOYEE, null, false, null)
             );
-            Page<DBUser> userPageWithPagination = new PageImpl<>(dbUsersWithPagination, PageRequest.of(0, 10), dbUsersWithPagination.size());
+            Page<User> userPageWithPagination = new PageImpl<>(usersWithPagination, PageRequest.of(0, 10), usersWithPagination.size());
 
             when(userService.getAllUsers(anyInt(), anyInt())).thenReturn(userPageWithPagination);
 
@@ -58,17 +58,17 @@
             when(userMapper.entityToPublicModel(userPageWithPagination.getContent())).thenReturn(publicUsersWithPagination);
 
             // Mocking getAllUsersWithoutPagination
-            List<DBUser> dbUsersWithoutPagination = Arrays.asList(
-                    new DBUser(1, "User1", "user1@example.com", "password", Role.EMPLOYEE, null, false, null),
-                    new DBUser(2, "User2", "user2@example.com", "password", Role.EMPLOYEE, null, false, null)
+            List<User> usersWithoutPagination = Arrays.asList(
+                    new User(1, "User1", "user1@example.com", "password", Role.EMPLOYEE, null, false, null),
+                    new User(2, "User2", "user2@example.com", "password", Role.EMPLOYEE, null, false, null)
             );
-            when(userService.getAllInterviewers()).thenReturn(dbUsersWithoutPagination);
+            when(userService.getAllInterviewers()).thenReturn(usersWithoutPagination);
 
             List<PublicUser> publicUsersWithoutPagination = Arrays.asList(
                     new PublicUser(1, "User1", "user1@example.com", Role.EMPLOYEE, false, null),
                     new PublicUser(2, "User2", "user2@example.com", Role.EMPLOYEE, false, null)
             );
-            when(userMapper.entityToPublicModel(dbUsersWithoutPagination)).thenReturn(publicUsersWithoutPagination);
+            when(userMapper.entityToPublicModel(usersWithoutPagination)).thenReturn(publicUsersWithoutPagination);
 
             UserController userController = new UserController(userService, userMapper);
             mockMvc = MockMvcBuilders.standaloneSetup(userController).build();

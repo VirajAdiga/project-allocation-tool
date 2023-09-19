@@ -21,5 +21,5 @@ public class AuthenticationRequest {
     /**
      * The password provided for authentication.
      */
-    String password;
+    private String password;
 }

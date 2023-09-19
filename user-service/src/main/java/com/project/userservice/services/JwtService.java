@@ -29,13 +29,13 @@ public class JwtService {
      * Extract the subject (typically user's email) from the JWT token.
      */
     public String extractSubject(String token) {
-        return extraClaim(token, Claims::getSubject);
+        return extractClaim(token, Claims::getSubject);
     }
 
     /**
      * Extract a specific claim using the provided claims resolver function.
      */
-    public<T> T extraClaim(String token, Function<Claims, T> claimsResolver) {
+    public<T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
     }
@@ -76,7 +76,7 @@ public class JwtService {
      * Extract the expiration date from a token's claims.
      */
     private Date extractExpiration(String token) {
-        return extraClaim(token, Claims::getExpiration);
+        return extractClaim(token, Claims::getExpiration);
     }
 
     /**
@@ -93,5 +93,4 @@ public class JwtService {
         byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
         return Keys.hmacShaKeyFor(keyBytes);
     }
-
 }

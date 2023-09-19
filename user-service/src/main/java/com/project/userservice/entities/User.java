@@ -16,7 +16,7 @@ import java.util.List;
 @Entity
 @Table(name = "users")
 // Entity class representing a user in the database.
-public class DBUser {
+public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id; // Unique identifier for the user.
@@ -38,5 +38,5 @@ public class DBUser {
             name = "users_skills",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "skill_id"))
-    private List<DBSkill> skills; // List of skills associated with the user.
+    private List<Skill> skills; // List of skills associated with the user.
 }

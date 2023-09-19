@@ -19,7 +19,7 @@ public interface UserService {
      * @param email The email of the user to retrieve.
      * @return An optional containing the user if found.
      */
-    Optional<DBUser> getUser(String email);
+    Optional<User> getUser(String email);
 
     /**
      * Deletes a user by their userId.
@@ -35,7 +35,7 @@ public interface UserService {
      * @param updatedUser  The updated user data.
      * @return The updated user.
      */
-    DBUser updateUser(Integer userId, DBUser updatedUser);
+    User updateUser(Integer userId, User updatedUser);
 
     /**
      * Retrieves a paginated list of all users.
@@ -44,7 +44,7 @@ public interface UserService {
      * @param pageNumber The page number.
      * @return A page containing the list of users.
      */
-    Page<DBUser> getAllUsers(Integer pageSize, Integer pageNumber);
+    Page<User> getAllUsers(Integer pageSize, Integer pageNumber);
 
     /**
      * Retrieves a user by their userId.
@@ -52,7 +52,7 @@ public interface UserService {
      * @param userId The ID of the user to retrieve.
      * @return An optional containing the user if found.
      */
-    Optional<DBUser> getUserById(Integer userId);
+    Optional<User> getUserById(Integer userId);
 
     /**
      * Creates a new user.
@@ -60,14 +60,14 @@ public interface UserService {
      * @param newUser The user data for creating a new user.
      * @return The created user.
      */
-    DBUser createUser(DBUser newUser);
+    User createUser(User newUser);
 
     /**
      * Retrieves a list of all users without pagination.
      *
      * @return A list containing all users.
      */
-    List<DBUser> getAllInterviewers();
+    List<User> getAllInterviewers();
 
     /**
      * Partially updates a user's information by userId.

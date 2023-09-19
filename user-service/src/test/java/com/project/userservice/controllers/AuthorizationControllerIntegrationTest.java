@@ -5,7 +5,7 @@ import com.project.userservice.services.AuthenticationService;
 import com.project.userservice.services.AuthorizationService;
 import com.project.userservice.config.JwtAuthenticationFilter;
 import com.project.userservice.mappers.UserMapper;
-import com.project.userservice.entities.DBUser;
+import com.project.userservice.entities.User;
 import com.project.userservice.entities.enums.PermissionName;
 import com.project.userservice.entities.enums.Role;
 import org.junit.jupiter.api.BeforeEach;
@@ -52,7 +52,7 @@ public class AuthorizationControllerIntegrationTest {
         jwtAuthenticationFilter.setDisabled(true);
 
         // Create a DBUser instance to use as the principal
-        DBUser dbUser = DBUser.builder()
+        User user = User.builder()
                 .id(1)
                 .name("Admin")
                 .email("admin@gmail.com")
@@ -60,13 +60,13 @@ public class AuthorizationControllerIntegrationTest {
                 .build();
 
         // Create an Authentication object with the DBUser as the principal
-        Authentication authentication = new UsernamePasswordAuthenticationToken(dbUser, null);
+        Authentication authentication = new UsernamePasswordAuthenticationToken(user, null);
 
         // Set the Authentication object in the SecurityContextHolder
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         // Generate the token and store it
-        String token = authorizationService.generateJWTTokenForUser(dbUser);
+        String token = authorizationService.generateJWTTokenForUser(user);
         authToken = token;
     }
 
