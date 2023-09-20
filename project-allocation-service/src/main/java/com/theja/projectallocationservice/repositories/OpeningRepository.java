@@ -50,7 +50,7 @@ public interface OpeningRepository extends JpaRepository<Opening, Long> {
      * @param projectId The ID of the project associated with the opening.
      * @return {@code true} if an opening with the same attributes exists, {@code false} otherwise.
      */
-    @Query("SELECT CASE WHEN COUNT(o) > 0 THEN true ELSE false END FROM DBOpening o " +
+    @Query("SELECT CASE WHEN COUNT(o) > 0 THEN true ELSE false END FROM Opening o " +
             "WHERE o.title = :title " +
             "AND o.details = :details " +
             "AND o.level = :level " +
