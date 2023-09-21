@@ -4,7 +4,6 @@ import com.project.userservice.dto.PublicUser;
 import com.project.userservice.dto.UpdateUserRequest;
 import com.project.userservice.exception.ResourceNotFoundException;
 import com.project.userservice.entities.*;
-import com.project.userservice.repositories.SkillRepository;
 import com.project.userservice.repositories.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
@@ -24,9 +23,6 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private UserRepository userRepository;
-
-    @Autowired
-    private SkillRepository skillRepository;
 
     // Retrieve a user by their email.
     @Override
