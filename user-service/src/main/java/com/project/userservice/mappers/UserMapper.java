@@ -1,7 +1,11 @@
 package com.project.userservice.mappers;
 
+import com.project.userservice.dto.PublicUserWithSkills;
+import com.project.userservice.dto.Skill;
 import com.project.userservice.entities.User;
 import com.project.userservice.dto.PublicUser;
+import com.project.userservice.services.ProjectAllocationServiceClient;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -13,9 +17,18 @@ import java.util.stream.Collectors;
  * Component class responsible for mapping between DBUser entities and PublicUser models.
  */
 @Component
+@AllArgsConstructor
 public class UserMapper {
     @Autowired
-    private SkillMapper skillMapper;  // Inject SkillMapper for skill mapping
+    private ProjectAllocationServiceClient projectAllocationServiceClient;
+
+    private List<Skill> getSkillOfUser(List<Long> skillIds){
+        List<Skill> skills = new ArrayList<>();
+        for (Long id: skillIds) {
+            skills.add(projectAllocationServiceClient.getSkill(id));
+        }
+        return skills;
+    }
 
     /**
      * Converts a list of DBUser entities to a list of PublicUser models.
@@ -40,8 +53,16 @@ public class UserMapper {
     public PublicUser entityToPublicModel(User user) {
         if (user != null) {
             // Create a new PublicUser model using data from the DBUser entity.
-            // Also map the user's skills using the injected SkillMapper.
-            return new PublicUser(user.getId(), user.getName(), user.getEmail(), user.getRole(), user.isInterviewer(), skillMapper.entityToModel(user.getSkills()));
+            return new PublicUser(user.getId(), user.getName(), user.getEmail(), user.getRole(), user.isInterviewer());
+        } else {
+            return null; // Return null if input entity is null.
+        }
+    }
+
+    public PublicUserWithSkills entityToPublicModelWithSkills(User user) {
+        if (user != null) {
+            // Create a new PublicUserWithSkills model using data from the DBUser entity.
+            return new PublicUserWithSkills(user.getId(), user.getName(), user.getEmail(), user.getRole(), user.isInterviewer(), getSkillOfUser(user.getSkillIds()));
         } else {
             return null; // Return null if input entity is null.
         }

@@ -121,8 +121,8 @@ public class UserServiceImpl implements UserService {
         if (updateUserRequest.getEmail() != null) {
             existingUser.setEmail(updateUserRequest.getEmail());
         }
-        if (updateUserRequest.getSkills() != null) {
-            existingUser.setSkills(updateUserRequest.getSkills());
+        if (updateUserRequest.getSkillIds() != null) {
+            existingUser.setSkillIds(updateUserRequest.getSkillIds());
         }
 
         userRepository.save(existingUser);

@@ -47,7 +47,7 @@ public class AuthenticationService {
                 .role(request.getRole())
                 .isInterviewer(false)
                 .token(null) // Token will be set later
-                .skills(null) // Skills will be set later
+                .skillIds(null) // Skills will be set later
                 .build();
 
         // Save the user to the repository and return the saved user.

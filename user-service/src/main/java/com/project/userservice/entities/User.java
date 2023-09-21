@@ -33,10 +33,5 @@ public class User {
     private String token; // Authentication token for the user.
     @Column(name = "is_interviewer")
     private boolean isInterviewer; // Corresponds to the can_interview column in the database.
-    @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.ALL})
-    @JoinTable(
-            name = "users_skills",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "skill_id"))
-    private List<Skill> skills; // List of skills associated with the user.
+    private List<Long> skillIds; // List of skill associated with the user.
 }
