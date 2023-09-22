@@ -52,7 +52,7 @@ public interface UserService {
      * @param userId The ID of the user to retrieve.
      * @return An optional containing the user if found.
      */
-    Optional<User> getUserById(Integer userId);
+    Optional<User> getUserById(Long userId);
 
     /**
      * Creates a new user.

@@ -39,7 +39,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public void deleteUser(Integer userId) {
         // Retrieve the user by userId
-        Optional<User> optionalUser = userRepository.findById(userId);
+        Optional<User> optionalUser = userRepository.findById(Long.valueOf(userId));
 
         // Check if the user exists
         if (optionalUser.isPresent()) {
@@ -54,7 +54,7 @@ public class UserServiceImpl implements UserService {
     // Update a user's information by userId.
     @Override
     public User updateUser(Integer userId, User updatedUser) {
-        Optional<User> optionalUser = userRepository.findById(userId);
+        Optional<User> optionalUser = userRepository.findById(Long.valueOf(userId));
 
         if (optionalUser.isPresent()) {
             User existingUser = optionalUser.get();
@@ -96,7 +96,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Optional<User> getUserById(Integer userId) {
+    public Optional<User> getUserById(Long userId) {
         return userRepository.findById(userId);
     }
 
@@ -112,7 +112,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void partialUpdateUser(Integer userId, UpdateUserRequest updateUserRequest) {
-        User existingUser = userRepository.findById(userId)
+        User existingUser = userRepository.findById(Long.valueOf(userId))
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         if (updateUserRequest.getName() != null) {
@@ -130,7 +130,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void partialUpdateAdminUser(Integer userId, PublicUser publicUser) {
-        User existingUser = userRepository.findById(userId)
+        User existingUser = userRepository.findById(Long.valueOf(userId))
                 .orElseThrow(() -> new RuntimeException("User not found"));
         if (publicUser.getName() != null) {
             existingUser.setName(publicUser.getName());

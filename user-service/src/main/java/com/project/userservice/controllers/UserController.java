@@ -3,6 +3,7 @@ package com.project.userservice.controllers;
 import com.project.userservice.dto.PublicUser;
 import com.project.userservice.dto.UpdateUserRequest;
 import com.project.userservice.dto.UserListResponse;
+import com.project.userservice.exception.ResourceNotFoundException;
 import com.project.userservice.mappers.UserMapper;
 import com.project.userservice.entities.*;
 import com.project.userservice.services.UserService;
@@ -21,6 +22,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 
 /**
@@ -45,6 +47,23 @@ public class UserController {
     public ResponseEntity<PublicUser> createUser(@RequestBody User newUser) {
         User createdUser = userService.createUser(newUser);
         return ResponseEntity.ok(userMapper.entityToPublicModel(createdUser));
+    }
+
+    /**
+     * Gets a user by their userId.
+     *
+     * @param userId The ID of the user to be retrieved.
+     * @return ResponseEntity indicating the result of the get operation.
+     */
+    @GetMapping("/{userId}")
+    @Hidden
+    public ResponseEntity<PublicUser> getUser(@PathVariable Long userId) {
+        Optional<User> user = userService.getUserById(userId);
+        if (user.isPresent()){
+            return ResponseEntity.ok(userMapper.entityToPublicModel(user.get()));
+        }else{
+            throw new ResourceNotFoundException(userId.toString());
+        }
     }
 
     /**
@@ -80,7 +99,6 @@ public class UserController {
     @ApiResponse(responseCode = "200", description = "List of users retrieved successfully", content = @Content(schema = @Schema(implementation = UserListResponse.class)))
     public ResponseEntity<UserListResponse> getAllUsers(@RequestParam(required = false) Integer pageSize, @RequestParam(required = false) Integer pageNumber) {
         Page<User> dbUsers = userService.getAllUsers(pageSize, pageNumber);
-        System.out.println(dbUsers);
         UserListResponse response = UserListResponse.builder()
                 .users(userMapper.entityToPublicModel(dbUsers.getContent()))
                 .totalElements(dbUsers.getTotalElements())

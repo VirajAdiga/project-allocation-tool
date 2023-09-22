@@ -12,7 +12,7 @@ import java.util.Optional;
  */
 @Repository
 // Repository interface for managing DBUser entities.
-public interface UserRepository extends JpaRepository<User, Integer> {
+public interface UserRepository extends JpaRepository<User, Long> {
 
    /**
     * Custom method to find a user by email.
