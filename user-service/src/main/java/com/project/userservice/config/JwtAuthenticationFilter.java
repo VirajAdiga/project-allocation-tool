@@ -64,14 +64,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter implements Ord
         }
 
         // Check for certain conditions where the filter should not be applied.
-        if (!request.getServletPath().startsWith("/api/v1/auth/register") && !request.getServletPath().startsWith("/api/v1/auth/authenticate") && (authHeader == null || !authHeader.startsWith("Bearer "))) {
+        if (!request.getServletPath().startsWith("/api/v1/auth/register") && !request.getServletPath().startsWith("/api/v1/auth/authenticate") && !request.getServletPath().startsWith("/api/v1/users/public") && (authHeader == null || !authHeader.startsWith("Bearer "))) {
             throw new RuntimeException("Invalid request");
-        } else if (request.getServletPath().startsWith("/api/v1/auth/register") || request.getServletPath().startsWith("/api/v1/auth/authenticate")) {
+        } else if (request.getServletPath().startsWith("/api/v1/auth/register") || request.getServletPath().startsWith("/api/v1/auth/authenticate") || request.getServletPath().startsWith("/api/v1/users/public")) {
             // For registration and authentication requests, bypass the filter and continue the chain.
             filterChain.doFilter(request, response);
             return;
         }
-
+        System.out.println("Not here");
         jwt = authHeader.substring(7);
         userEmail = jwtService.extractSubject(jwt);
 

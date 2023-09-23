@@ -1,6 +1,7 @@
 package com.project.userservice.controllers;
 
 import com.project.userservice.dto.PublicUser;
+import com.project.userservice.dto.PublicUserListResponse;
 import com.project.userservice.dto.UpdateUserRequest;
 import com.project.userservice.dto.UserListResponse;
 import com.project.userservice.exception.ResourceNotFoundException;
@@ -21,7 +22,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 
@@ -37,6 +40,44 @@ public class UserController {
     private final UserMapper userMapper;
 
     /**
+     * Gets a user by their userId.
+     *
+     * @param userId The ID of the user to be retrieved.
+     * @return ResponseEntity indicating the result of the get operation.
+     */
+    @GetMapping("/public/{userId}")
+    @Hidden
+    public PublicUser getUser(@PathVariable Long userId) {
+        Optional<User> user = userService.getUserById(userId);
+        if (user.isPresent()){
+            return userMapper.entityToPublicModel(user.get());
+        }else{
+            throw new ResourceNotFoundException(userId.toString());
+        }
+    }
+
+    /**
+     * Gets list of users by their userId.
+     *
+     * @param requestBody The request body containing id of users.
+     * @return ResponseEntity indicating the result of the get operation.
+     */
+    @PostMapping("/public")
+    @Hidden
+    public PublicUserListResponse getUsers(@RequestBody Map<String, List<Long>> requestBody) {
+        List<Long> userIds = requestBody.get("userIds");
+        List<PublicUser> publicUsers = new ArrayList<>();
+        for (Long userId: userIds ) {
+            Optional<User> user = userService.getUserById(userId);
+            if (user.isPresent()) {
+                PublicUser publicUser = userMapper.entityToPublicModel(user.get());
+                publicUsers.add(publicUser);
+            }
+        }
+        return new PublicUserListResponse(publicUsers, (long) publicUsers.size());
+    }
+
+    /**
      * Creates a new user with the provided user data.
      *
      * @param newUser The user data to create a new user.
@@ -47,23 +88,6 @@ public class UserController {
     public ResponseEntity<PublicUser> createUser(@RequestBody User newUser) {
         User createdUser = userService.createUser(newUser);
         return ResponseEntity.ok(userMapper.entityToPublicModel(createdUser));
-    }
-
-    /**
-     * Gets a user by their userId.
-     *
-     * @param userId The ID of the user to be retrieved.
-     * @return ResponseEntity indicating the result of the get operation.
-     */
-    @GetMapping("/{userId}")
-    @Hidden
-    public ResponseEntity<PublicUser> getUser(@PathVariable Long userId) {
-        Optional<User> user = userService.getUserById(userId);
-        if (user.isPresent()){
-            return ResponseEntity.ok(userMapper.entityToPublicModel(user.get()));
-        }else{
-            throw new ResourceNotFoundException(userId.toString());
-        }
     }
 
     /**
