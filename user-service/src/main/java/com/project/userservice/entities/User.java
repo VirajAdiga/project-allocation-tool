@@ -30,7 +30,6 @@ public class User {
     @NotNull(message = "Role is required")
     @Enumerated(EnumType.STRING)
     private Role role; // Role of the user.
-    private String token; // Authentication token for the user.
     @Column(name = "is_interviewer")
     private boolean isInterviewer; // Corresponds to the can_interview column in the database.
     private List<Long> skillIds; // List of skill associated with the user.
