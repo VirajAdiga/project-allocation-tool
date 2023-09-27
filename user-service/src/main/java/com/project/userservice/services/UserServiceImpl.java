@@ -72,11 +72,6 @@ public class UserServiceImpl implements UserService {
             if (updatedUser.getRole() != null) {
                 existingUser.setRole(updatedUser.getRole());
             }
-            if (updatedUser.getToken() != null) {
-                existingUser.setToken(updatedUser.getToken());
-            }
-
-            System.out.println(existingUser);
 
             // Save the updated user
             return userRepository.save(existingUser);

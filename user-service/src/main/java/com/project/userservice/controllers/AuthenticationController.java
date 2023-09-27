@@ -5,6 +5,7 @@ import com.project.userservice.services.AuthenticationService;
 import com.project.userservice.services.AuthorizationService;
 import com.project.userservice.dto.RegisterRequest;
 import com.project.userservice.entities.User;
+import com.project.userservice.services.BlacklistTokenService;
 import com.project.userservice.services.UserService;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
@@ -35,6 +36,9 @@ public class AuthenticationController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private BlacklistTokenService blacklistTokenService;
+
     /**
      * Registers a new user.
      *
@@ -50,9 +54,6 @@ public class AuthenticationController {
 
         // Generate the JWT token for the created user
         String token = authorizationService.generateJWTTokenForUser(createdUser);
-
-        // Set the token using the setToken method of DBUser
-        createdUser.setToken(token);
 
         // Save the updated user with the token
         userService.updateUser(createdUser.getId(), createdUser);
@@ -79,9 +80,6 @@ public class AuthenticationController {
         // Generate the JWT token for the created user
         String token = authorizationService.generateJWTTokenForUser(existingUser);
 
-        // Set the token using the setToken method of DBUser
-        existingUser.setToken(token);
-
         // Save the updated user with the token
         userService.updateUser(existingUser.getId(), existingUser);
 
@@ -95,12 +93,12 @@ public class AuthenticationController {
      * @param response HttpServletResponse to set the response headers.
      * @return ResponseEntity indicating the result of the logout operation.
      */
-    @DeleteMapping("/logout")
+    @PostMapping("/logout")
     @Hidden
     public ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse response) {
         try {
             // Call the logout service method to perform the logout logic
-            authenticationService.logout(request, response);
+            blacklistTokenService.addTokenToBlacklist(request, response);
             return ResponseEntity.ok("Logged out successfully.");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to logout.");
