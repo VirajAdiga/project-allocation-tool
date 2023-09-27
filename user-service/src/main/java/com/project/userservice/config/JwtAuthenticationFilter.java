@@ -2,6 +2,7 @@ package com.project.userservice.config;
 
 import com.project.userservice.entities.User;
 import com.project.userservice.repositories.UserRepository;
+import com.project.userservice.services.BlacklistTokenService;
 import com.project.userservice.services.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -27,6 +28,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter implements Ord
 
     private final JwtService jwtService;
     private final UserRepository userRepository;
+    private final BlacklistTokenService blacklistTokenService;
 
     private boolean disabled = false; // Flag to temporarily disable the filter
 
@@ -71,16 +73,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter implements Ord
             filterChain.doFilter(request, response);
             return;
         }
-        System.out.println("Not here");
+
         jwt = authHeader.substring(7);
         userEmail = jwtService.extractSubject(jwt);
 
         if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             User user = userRepository.findByEmail(userEmail).orElseThrow(RuntimeException::new);
-            String storedToken = user.getToken(); // Retrieve the token from the user object
 
             // Validate the token and ensure it matches the stored token.
-            if (storedToken != null && jwtService.isTokenValid(jwt, userEmail) && jwt.equals(storedToken)) {
+            if (jwtService.isTokenValid(jwt, userEmail) && !blacklistTokenService.isTokenBlacklisted(jwt)) {
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         user,
                         null,
@@ -93,6 +94,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter implements Ord
                 filterChain.doFilter(request, response);
                 return;
             }
+            throw  new RuntimeException("Invalid credentials");
         }
 
         // If none of the conditions are met, throw an exception indicating invalid user email.
