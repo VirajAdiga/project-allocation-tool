@@ -33,12 +33,4 @@ public class User {
     @Column(name = "is_interviewer")
     private boolean isInterviewer; // Corresponds to the can_interview column in the database.
     private List<Long> skillIds; // List of skill associated with the user.
-
-    private List<Long> interviews;  // List of interviews conducted by the user
-
-    private List<Long> applications;  // List of applications made by the user
-
-    private List<Long> actions;  // List of audit logs associated with the user's actions
-
-    private List<Long> openings;  // List of job openings managed by the user
 }

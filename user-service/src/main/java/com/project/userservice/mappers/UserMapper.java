@@ -1,6 +1,5 @@
 package com.project.userservice.mappers;
 
-import com.project.userservice.dto.PublicUserStats;
 import com.project.userservice.dto.Skill;
 import com.project.userservice.entities.User;
 import com.project.userservice.dto.PublicUser;
@@ -54,15 +53,6 @@ public class UserMapper {
         if (user != null) {
             // Create a new PublicUser model using data from the DBUser entity.
             return new PublicUser(user.getId(), user.getName(), user.getEmail(), user.getRole(), user.isInterviewer());
-        } else {
-            return null; // Return null if input entity is null.
-        }
-    }
-
-    public PublicUserStats entityToPublicModelWithSkills(User user) {
-        if (user != null) {
-            // Create a new PublicUserWithSkills model using data from the DBUser entity.
-            return new PublicUserStats(user.getId(), user.getName(), user.getEmail(), user.getRole(), user.isInterviewer(), getSkillOfUser(user.getSkillIds()), user.getInterviews(), user.getApplications(), user.getActions(), user.getOpenings());
         } else {
             return null; // Return null if input entity is null.
         }
