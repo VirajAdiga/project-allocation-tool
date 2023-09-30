@@ -49,6 +49,8 @@ public class ApplicationController {
     private RequestContext requestContext;
     @Autowired
     private AuditCommentService auditCommentService;
+    @Autowired
+    private UserServiceClient userServiceClient;
 
     /**
      * Retrieve a paginated list of applications with optional status filter.
@@ -70,7 +72,7 @@ public class ApplicationController {
             AuditLog auditLog = auditLogService.createAuditLog(
                     AuditLog.builder()
                             .action("Fetching all pending applications")
-                            .user(User.builder().id(requestContext.getLoggedinUser().getId()).build())
+                            .userId(requestContext.getLoggedinUser().getId())
                             .loggedAt(new Date())
                             .auditComments(new ArrayList<>())
                             .build());
@@ -141,7 +143,6 @@ public class ApplicationController {
      * Apply for an opening by creating an application.
      *
      * @param openingId    ID of the opening to apply for.
-     * @param application    Application details to be created.
      * @return ResponseEntity containing the created application.
      */
     @PostMapping("/openings/{openingId}/applications")
@@ -149,12 +150,12 @@ public class ApplicationController {
     @ApiResponse(responseCode = "201", description = "Application created successfully", content = @Content(schema = @Schema(implementation = com.theja.projectallocationservice.dto.Application.class)))
     @ApiResponse(responseCode = "400", description = "Bad request")
     @ApiResponse(responseCode = "404", description = "Opening not found")
-    public ResponseEntity<com.theja.projectallocationservice.dto.Application> createApplication(@PathVariable Long openingId, @RequestBody Application application) {
+    public ResponseEntity<com.theja.projectallocationservice.dto.Application> createApplication(@PathVariable Long openingId) {
         // Create Audit log
         AuditLog auditLog = auditLogService.createAuditLog(
                 AuditLog.builder()
                         .action("Applying for opening " + openingId)
-                        .user(User.builder().id(requestContext.getLoggedinUser().getId()).build())
+                        .userId(requestContext.getLoggedinUser().getId())
                         .loggedAt(new Date())
                         .auditComments(new ArrayList<>())
                         .build());
@@ -167,7 +168,9 @@ public class ApplicationController {
         // Opening
         if (opening != null) {
             // Associate the application with the opening
+            Application application = new Application();
             application.setOpening(opening);
+            application.setCandidateId(requestContext.getLoggedinUser().getId());
             application.setStatus(ApplicationStatus.APPLIED);
             application.setAppliedAt(new Date());
             application.setInterviews(new ArrayList<>());
@@ -236,7 +239,7 @@ public class ApplicationController {
         AuditLog auditLog = auditLogService.createAuditLog(
                 AuditLog.builder()
                         .action("Updating status of application id " + applicationId)
-                        .user(User.builder().id(requestContext.getLoggedinUser().getId()).build())
+                        .userId(requestContext.getLoggedinUser().getId())
                         .loggedAt(new Date())
                         .auditComments(new ArrayList<>())
                         .build());
@@ -272,7 +275,8 @@ public class ApplicationController {
                     .auditLog(auditLog)
                     .build());
             if (newStatus != ApplicationStatus.REJECTED) {
-                projectService.allocateUser(dbUpdatedApplication.getOpening().getProject(), dbUpdatedApplication.getCandidate());
+                projectService.allocateUser(dbUpdatedApplication.getOpening().getProject(), dbUpdatedApplication.getCandidateId());
+                userServiceClient.updateUserProjectAllocation(dbUpdatedApplication.getCandidateId(), dbUpdatedApplication.getOpening().getProject().getId());
                 auditCommentService.createAuditComment(AuditComment.builder()
                         .comment("Application accepted and applicant is allocated to the project")
                         .auditLog(auditLog)

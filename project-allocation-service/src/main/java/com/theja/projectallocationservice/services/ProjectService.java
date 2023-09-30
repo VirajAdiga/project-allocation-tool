@@ -2,7 +2,6 @@ package com.theja.projectallocationservice.services;
 
 import com.theja.projectallocationservice.dto.CreateProjectDTO;
 import com.theja.projectallocationservice.entities.Project;
-import com.theja.projectallocationservice.entities.User;
 import com.theja.projectallocationservice.repositories.ProjectRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -125,17 +124,17 @@ public class ProjectService {
      * Allocates a user to the specified project.
      *
      * @param project The project to which the user will be allocated.
-     * @param candidate The user to be allocated to the project.
+     * @param candidateId The user to be allocated to the project.
      */
-    public void allocateUser(Project project, User candidate) {
+    public void allocateUser(Project project, Long candidateId) {
         // Check if the allocatedUsers set of the project is not initialized
-        if (project.getAllocatedUsers() == null) {
+        if (project.getAllocatedUsersId() == null) {
             // Initialize the allocatedUsers set with an empty HashSet
-            project.setAllocatedUsers(new HashSet<>());
+            project.setAllocatedUsersId(new HashSet<>());
         }
 
         // Add the candidate user to the allocatedUsers set
-        project.getAllocatedUsers().add(candidate);
+        project.getAllocatedUsersId().add(candidateId);
 
         // Save the updated project with the allocated user to the repository
         projectRepository.save(project);

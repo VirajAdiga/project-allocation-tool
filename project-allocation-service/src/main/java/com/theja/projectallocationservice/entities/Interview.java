@@ -23,9 +23,8 @@ public class Interview {
 
     private String title;  // Title of the interview
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "interviewer_id")
-    private User interviewer;  // The user who conducts the interview
+    @Column(nullable = false)
+    private Long interviewerId;  // The user who conducts the interview
 
     @Enumerated(EnumType.STRING)
     private InterviewStatus status;  // Status of the interview, e.g., "SCHEDULED," "COMPLETED"

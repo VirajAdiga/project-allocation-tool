@@ -1,5 +1,6 @@
 package com.theja.projectallocationservice.services;
 
+import com.theja.projectallocationservice.dto.PublicUserListResponse;
 import com.theja.projectallocationservice.entities.enums.PermissionName;
 import com.theja.projectallocationservice.dto.PublicUser;
 
@@ -21,4 +22,22 @@ public interface UserServiceClient {
      * @return Public user information.
      */
     PublicUser getUser(String authHeader);
+
+    /**
+     * Get public user information based on the user id.
+     *
+     * @param userId The user id of the user.
+     * @return Public user information.
+     */
+    PublicUser getUserById(Long userId);
+
+    /**
+     * Get list of public user information based on the user ids.
+     *
+     * @param userIds The user ids of the users.
+     * @return List of Public user information.
+     */
+    PublicUserListResponse getUsersById(List<Long> userIds);
+
+    void updateUserProjectAllocation(Long userId, Long projectId);
 }

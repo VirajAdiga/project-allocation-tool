@@ -29,9 +29,8 @@ public class AuditLog {
     @Column(name = "logged_at")
     private Date loggedAt;  // Timestamp of when the audit log was created
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "user_id")
-    private User user;  // The user associated with the action being audited
+    @Column(nullable = false)
+    private Long userId;  // The user associated with the action being audited
 
     @OneToMany(mappedBy="auditLog", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<AuditComment> auditComments = new ArrayList<>();  // List of comments associated with the audit log

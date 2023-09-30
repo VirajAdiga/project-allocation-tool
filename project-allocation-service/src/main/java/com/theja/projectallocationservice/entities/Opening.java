@@ -38,9 +38,7 @@ public class Opening {
     @Enumerated(EnumType.STRING)
     private OpeningStatus status;  // Status of the job opening, e.g., "ACTIVE," "CLOSED"
 
-    @ManyToOne
-    @JoinColumn(name = "created_by")
-    private User recruiter;  // The user who created the job opening
+    private Long recruiterId;  // The user who created the job opening
 
     @ManyToOne(optional = false)
     @JoinColumn(name="project_id")

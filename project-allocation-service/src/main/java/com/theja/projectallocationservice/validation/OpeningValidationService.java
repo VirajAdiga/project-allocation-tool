@@ -48,7 +48,7 @@ public class OpeningValidationService {
         AuditLog auditLog = auditLogService.createAuditLog(
                 AuditLog.builder()
                         .action("Create Opening for project " + projectId)
-                        .user(User.builder().id(requestContext.getLoggedinUser().getId()).build())
+                        .userId(requestContext.getLoggedinUser().getId())
                         .loggedAt(new Date())
                         .auditComments(new ArrayList<>())
                         .build());

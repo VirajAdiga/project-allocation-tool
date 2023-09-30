@@ -121,7 +121,7 @@ public class InterviewController {
         AuditLog auditLog = auditLogService.createAuditLog(
                 AuditLog.builder()
                         .action("Scheduling interview for application id " + applicationId)
-                        .user(User.builder().id(requestContext.getLoggedinUser().getId()).build())
+                        .userId(requestContext.getLoggedinUser().getId())
                         .loggedAt(new Date())
                         .auditComments(new ArrayList<>())
                         .build());
@@ -212,7 +212,7 @@ public class InterviewController {
         AuditLog auditLog = auditLogService.createAuditLog(
                 AuditLog.builder()
                         .action("Updating status of interview with id " + interviewId)
-                        .user(User.builder().id(requestContext.getLoggedinUser().getId()).build())
+                        .userId(requestContext.getLoggedinUser().getId())
                         .loggedAt(new Date())
                         .auditComments(new ArrayList<>())
                         .build());

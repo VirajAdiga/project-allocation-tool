@@ -18,7 +18,5 @@ public class Skill {
     private Long id;                // Unique identifier for the skill
     private String title;           // Title or name of the skill
     @JsonIgnore
-    private List<User> users;       // List of users possessing this skill
-    @JsonIgnore
     private List<Opening> openings; // List of openings requiring this skill
 }

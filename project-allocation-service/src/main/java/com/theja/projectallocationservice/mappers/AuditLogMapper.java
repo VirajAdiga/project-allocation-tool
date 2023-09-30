@@ -1,6 +1,7 @@
 package com.theja.projectallocationservice.mappers;
 
 import com.theja.projectallocationservice.entities.AuditLog;
+import com.theja.projectallocationservice.services.UserServiceClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -10,7 +11,7 @@ import java.util.stream.Collectors;
 @Component
 public class AuditLogMapper {
     @Autowired
-    private UserMapper userMapper;
+    private UserServiceClient userServiceClient;
 
     // Convert a list of DBAuditLog entities to a list of AuditLog model objects
     public List<com.theja.projectallocationservice.dto.AuditLog> entityToModel(List<AuditLog> auditLogs) {
@@ -25,7 +26,7 @@ public class AuditLogMapper {
                 auditLog.getId(),
                 auditLog.getAction(),
                 auditLog.getLoggedAt(),
-                userMapper.entityToPublicModel(auditLog.getUser()),
+                userServiceClient.getUserById(auditLog.getUserId()),
                 null
         );
     }

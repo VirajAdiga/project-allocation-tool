@@ -25,11 +25,7 @@ public class Project {
 
     private String details;  // Details or description of the project
 
-    @ManyToMany
-    @JoinTable(name = "users_projects",
-            joinColumns = @JoinColumn(name = "project_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id"))
-    private Set<User> allocatedUsers;  // Set of users allocated to the project
+    private Set<Long> allocatedUsersId;  // Set of users allocated to the project
 
     @OneToMany(mappedBy="project", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Opening> openings;  // List of job openings associated with the project

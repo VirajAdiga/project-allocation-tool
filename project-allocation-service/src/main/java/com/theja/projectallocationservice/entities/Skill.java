@@ -23,8 +23,5 @@ public class Skill {
     private String title;  // Title or name of the skill
 
     @ManyToMany(mappedBy = "skills")
-    private List<User> users;  // List of users possessing this skill
-
-    @ManyToMany(mappedBy = "skills")
     private List<Opening> openings;  // List of job openings requiring this skill
 }

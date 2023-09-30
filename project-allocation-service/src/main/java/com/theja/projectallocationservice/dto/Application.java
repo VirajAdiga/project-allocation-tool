@@ -1,5 +1,6 @@
 package com.theja.projectallocationservice.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.theja.projectallocationservice.entities.enums.ApplicationStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -17,5 +18,6 @@ public class Application {
     private Date appliedAt; // Date when the application was submitted
     private PublicUser candidate; // Public information about the candidate who applied
     private Opening opening; // Details of the opening to which the application is related
+    @JsonIgnore
     private List<Interview> interviews; // List of interviews associated with the application
 }

@@ -12,13 +12,13 @@ import java.util.List;
 @Repository
 public interface SkillRepository extends JpaRepository<Skill, Long> {
 
-    /**
-     * Retrieves a list of skills associated with a specific user.
-     *
-     * @param userId ID of the user.
-     * @return A list of skills associated with the user.
-     */
-    List<Skill> findByUsersId(Long userId);
+//    /**
+//     * Retrieves a list of skills associated with a specific user.
+//     *
+//     * @param userId ID of the user.
+//     * @return A list of skills associated with the user.
+//     */
+//    List<Skill> findByUsersId(Long userId);
 
     /**
      * Retrieves a list of skills associated with a specific opening.

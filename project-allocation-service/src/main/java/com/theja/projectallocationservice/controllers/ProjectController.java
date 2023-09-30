@@ -134,7 +134,7 @@ public class ProjectController {
         AuditLog auditLog = auditLogService.createAuditLog(
                 AuditLog.builder()
                         .action("Creating project")
-                        .user(User.builder().id(requestContext.getLoggedinUser().getId()).build())
+                        .userId(requestContext.getLoggedinUser().getId())
                         .loggedAt(new Date())
                         .auditComments(new ArrayList<>())
                         .build());
@@ -166,7 +166,7 @@ public class ProjectController {
     /**
      * Creates a new project.
      *
-     * @param projectDTO The project details to be created.
+     * @param project The project details to be created.
      * @return The created project model in the response.
      */
     // Update an existing project

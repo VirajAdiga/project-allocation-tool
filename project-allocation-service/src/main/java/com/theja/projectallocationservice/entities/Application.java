@@ -28,9 +28,8 @@ public class Application {
     @Column(name = "applied_at")
     private Date appliedAt;  // Date when the application was submitted
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "candidate_id")
-    private User candidate;  // The candidate (applicant) associated with the application
+    @Column(nullable = false)
+    private Long candidateId;  // The candidate (applicant) associated with the application
 
     @ManyToOne(optional = false)
     @JoinColumn(name="opening_id")

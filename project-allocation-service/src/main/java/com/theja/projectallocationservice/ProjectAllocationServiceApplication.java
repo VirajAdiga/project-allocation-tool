@@ -19,4 +19,3 @@ public class ProjectAllocationServiceApplication {
 		SpringApplication.run(ProjectAllocationServiceApplication.class, args);
 	}
 }
-

@@ -125,7 +125,7 @@ public class OpeningController {
         AuditLog auditLog = auditLogService.createAuditLog(
                 AuditLog.builder()
                         .action("Create Opening for project " + projectId)
-                        .user(User.builder().id(requestContext.getLoggedinUser().getId()).build())
+                        .userId(requestContext.getLoggedinUser().getId())
                         .loggedAt(new Date())
                         .auditComments(new ArrayList<>())
                         .build());
@@ -159,8 +159,9 @@ public class OpeningController {
                 .build());
         // Map the opening to a project and validate skills
         opening.setProject(projectService.getProjectById(projectId));
+        opening.setRecruiterId(requestContext.getLoggedinUser().getId());
         auditCommentService.createAuditComment(AuditComment.builder()
-                .comment("Project mapped to opening")
+                .comment("Project and recruiter mapped to opening")
                 .auditLog(auditLog)
                 .build());
         // Retrieve the Skill entities from the database using the provided skillIds
@@ -205,7 +206,7 @@ public class OpeningController {
         AuditLog auditLog = auditLogService.createAuditLog(
                 AuditLog.builder()
                         .action("Update Opening " + id)
-                        .user(User.builder().id(requestContext.getLoggedinUser().getId()).build())
+                        .userId(requestContext.getLoggedinUser().getId())
                         .loggedAt(new Date())
                         .auditComments(new ArrayList<>())
                         .build());

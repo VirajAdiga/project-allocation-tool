@@ -1,6 +1,7 @@
 package com.theja.projectallocationservice.mappers;
 
 import com.theja.projectallocationservice.entities.*;
+import com.theja.projectallocationservice.services.UserServiceClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -11,7 +12,7 @@ import java.util.stream.Collectors;
 public class InterviewMapper {
 
     @Autowired
-    private UserMapper userMapper;
+    private UserServiceClient userServiceClient;
 
     @Autowired
     private ApplicationMapper applicationMapper;
@@ -28,7 +29,7 @@ public class InterviewMapper {
         return new com.theja.projectallocationservice.dto.Interview(
                 interview.getId(),
                 interview.getTitle(),
-                userMapper.entityToPublicModel(interview.getInterviewer()),
+                userServiceClient.getUserById(interview.getInterviewerId()),
                 interview.getStatus(),
                 interview.getFeedback(),
                 interview.getScheduledTime(),

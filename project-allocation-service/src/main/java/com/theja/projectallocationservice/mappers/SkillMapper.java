@@ -26,7 +26,6 @@ public class SkillMapper {
         return new com.theja.projectallocationservice.dto.Skill(
                 skill.getId(),
                 skill.getTitle(),
-                null,
                 null
         );
     }

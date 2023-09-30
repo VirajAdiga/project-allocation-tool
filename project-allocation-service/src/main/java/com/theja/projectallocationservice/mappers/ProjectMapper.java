@@ -1,6 +1,7 @@
 package com.theja.projectallocationservice.mappers;
 
 import com.theja.projectallocationservice.entities.Project;
+import com.theja.projectallocationservice.services.UserServiceClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -11,7 +12,7 @@ import java.util.stream.Collectors;
 public class ProjectMapper {
 
     @Autowired
-    private UserMapper userMapper;
+    private UserServiceClient userServiceClient;
 
     // Convert a list of DBProject entities to a list of Project model objects
     public List<com.theja.projectallocationservice.dto.Project> entityToModel(List<Project> projects) {
@@ -26,7 +27,7 @@ public class ProjectMapper {
                 project.getId(),
                 project.getTitle(),
                 project.getDetails(),
-                userMapper.entityToModel(project.getAllocatedUsers()),
+                null,
                 null
         );
     }
