@@ -46,5 +46,10 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleCustomAuthenticationException(CustomAuthenticationException ex) {
         return ResponseEntity.status(HttpServletResponse.SC_UNAUTHORIZED).body(ex.getMessage());
     }
+
+    @ExceptionHandler(UnauthorizedAccessException.class)
+    public ResponseEntity<String> handleUnauthorizedAccessException(UnauthorizedAccessException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ex.getMessage());
+    }
 }
 
