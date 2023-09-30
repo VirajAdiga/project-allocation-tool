@@ -141,4 +141,12 @@ public class UserServiceImpl implements UserService {
         }
         userRepository.save(existingUser);
     }
+
+    @Override
+    public void updateUserProjectAllocation(Long userId, Long userProjectId) {
+        User existingUser = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        existingUser.setProjectAllocatedId(userProjectId);
+        userRepository.save(existingUser);
+    }
 }

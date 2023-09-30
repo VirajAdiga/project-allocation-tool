@@ -84,4 +84,6 @@ public interface UserService {
      * @param publicUser  The updated admin user data.
      */
     void partialUpdateAdminUser(Integer userId, PublicUser publicUser);
+
+    void updateUserProjectAllocation(Long userId, Long userProjectId);
 }

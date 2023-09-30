@@ -3,6 +3,7 @@ package com.project.userservice.controllers;
 import com.project.userservice.dto.PublicUser;
 import com.project.userservice.dto.PublicUserListResponse;
 import com.project.userservice.dto.UpdateUserRequest;
+import com.project.userservice.dto.UserProjectAllocationRequest;
 import com.project.userservice.exception.ResourceNotFoundException;
 import com.project.userservice.mappers.UserMapper;
 import com.project.userservice.entities.*;
@@ -52,6 +53,17 @@ public class UserController {
             return userMapper.entityToPublicModel(user.get());
         }else{
             throw new ResourceNotFoundException(userId.toString());
+        }
+    }
+
+    @PostMapping("/public/{userId}")
+    public ResponseEntity<String> updateUserProjectAllocation(@PathVariable Integer userId, @RequestBody UserProjectAllocationRequest userProjectAllocationRequest){
+        Optional<User> user = userService.getUserById(Long.valueOf(userId));
+        if (user.isPresent()){
+            userService.updateUserProjectAllocation(Long.valueOf(user.get().getId()), userProjectAllocationRequest.getProjectAllocatedId());
+            return ResponseEntity.ok("Project allocated successfully");
+        } else {
+            throw new ResourceNotFoundException(String.format("User with id %d not found", userId));
         }
     }
 
