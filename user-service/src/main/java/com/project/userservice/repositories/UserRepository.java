@@ -1,7 +1,10 @@
 package com.project.userservice.repositories;
 
 import com.project.userservice.entities.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -23,4 +26,22 @@ public interface UserRepository extends JpaRepository<User, Long> {
    Optional<User> findByEmail(Object email);
 
    List<User> findByIsInterviewerTrue(); // Custom query to retrieve users with is_interviewer = true
+
+   /**
+    * Retrieves a page of users who are not allocated to any projects.
+    *
+    * @param pageable Pageable object for pagination.
+    * @return A page of users in the free pool.
+    */
+   @Query(value = "SELECT * FROM users WHERE role='EMPLOYEE' and project_allocated_id IS NULL;", nativeQuery = true)
+   Page<User> getFreePoolUsers(Pageable pageable);
+
+   /**
+    * Retrieves a page of users who have been allocated to projects within a specified date range.
+    *
+    * @param pageable  Pageable object for pagination.
+    * @return A page of users allocated within the specified date range.
+    */
+   @Query(value = "SELECT * FROM users WHERE role='EMPLOYEE' and project_allocated_id IS NOT NULL;", nativeQuery = true)
+   Page<User> getAllAllocatedUsers(Pageable pageable);
 }

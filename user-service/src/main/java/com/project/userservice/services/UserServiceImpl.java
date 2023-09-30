@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -148,5 +149,33 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
         existingUser.setProjectAllocatedId(userProjectId);
         userRepository.save(existingUser);
+    }
+
+    /**
+     * Retrieve a page of users from the free pool.
+     *
+     * @param pageSize   The maximum number of users per page.
+     * @param pageNumber The page number to retrieve (0-based).
+     * @return A page of free pool users.
+     */
+    public Page<User> getFreePoolUsers(Integer pageSize, Integer pageNumber) {
+        if (pageSize == null) pageSize = 1000;
+        if (pageNumber == null) pageNumber = 0;
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        return userRepository.getFreePoolUsers(pageable);
+    }
+
+    /**
+     * Retrieve a page of users allocated to projects.
+     *
+     * @param pageSize   The maximum number of users per page.
+     * @param pageNumber The page number to retrieve (0-based).
+     * @return A page of allocated users within the specified date range.
+     */
+    public Page<User> getAllAllocatedUsers(Integer pageSize, Integer pageNumber) {
+        if (pageSize == null) pageSize = 1000;
+        if (pageNumber == null) pageNumber = 0;
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        return userRepository.getAllAllocatedUsers(pageable);
     }
 }

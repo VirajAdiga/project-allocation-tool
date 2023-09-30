@@ -1,10 +1,10 @@
 package com.project.userservice.controllers;
 
-import com.project.userservice.dto.PublicUser;
-import com.project.userservice.dto.PublicUserListResponse;
-import com.project.userservice.dto.UpdateUserRequest;
-import com.project.userservice.dto.UserProjectAllocationRequest;
+import com.project.userservice.dto.*;
+import com.project.userservice.entities.enums.PermissionName;
+import com.project.userservice.entities.enums.Role;
 import com.project.userservice.exception.ResourceNotFoundException;
+import com.project.userservice.exception.UnauthorizedAccessException;
 import com.project.userservice.mappers.UserMapper;
 import com.project.userservice.entities.*;
 import com.project.userservice.services.UserService;
@@ -16,12 +16,16 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -192,5 +196,58 @@ public class UserController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
+    }
+
+    /**
+     * Retrieves a paginated list of free pool users' report.
+     *
+     * @param pageSize   The number of users per page.
+     * @param pageNumber The page number of users to retrieve.
+     * @return The response containing a list of free pool user models with pagination details.
+     */
+    // Get all free pool users report
+    @GetMapping("/reports/free")
+    @Operation(summary = "Get all free pool users report", description = "Retrieve a paginated list of free pool users' report")
+    @ApiResponse(responseCode = "200", description = "Free pool users report retrieved successfully", content = @Content(schema = @Schema(implementation = FreePoolUserResponse.class)))
+    public ResponseEntity<FreePoolUserResponse> getAllFreePoolUsers(@RequestParam(required = false) Integer pageSize, @RequestParam(required = false) Integer pageNumber) {
+        // Check user permissions to view reports
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (user.getRole() != Role.ADMIN) {
+            throw new UnauthorizedAccessException("You don't have permission to access any reports.");
+        }
+        // Fetch free pool users and return the response with pagination details
+        Page<User> dbUsers = userService.getFreePoolUsers(pageSize, pageNumber);
+        FreePoolUserResponse response = FreePoolUserResponse.builder()
+                .freePoolUsers(userMapper.entityToPublicModel(dbUsers.getContent()))
+                .totalElements(dbUsers.getTotalElements())
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Retrieves a paginated list of allocated users' report within a specified date range.
+     *
+     * @param pageSize   The number of users per page.
+     * @param pageNumber The page number of users to retrieve.
+     * @return The response containing a list of allocated user models with pagination details.
+     * @throws ParseException If there's an error parsing the provided date strings.
+     */
+    // Get all allocated users report within a date range
+    @GetMapping("/reports/allocated")
+    @Operation(summary = "Get all allocated users report", description = "Retrieve a paginated list of allocated users' report within a specified date range")
+    @ApiResponse(responseCode = "200", description = "Allocated users report retrieved successfully", content = @Content(schema = @Schema(implementation = AllocatedPoolUserResponse.class)))
+    public ResponseEntity<AllocatedPoolUserResponse> getAllAllocatedUsers(@RequestParam(required = false) Integer pageSize, @RequestParam(required = false) Integer pageNumber) throws ParseException {
+        // Check user permissions to view reports
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (user.getRole() != Role.ADMIN) {
+            throw new UnauthorizedAccessException("You don't have permission to access any reports.");
+        }
+        // Fetch allocated users within the date range and return the response with pagination details
+        Page<User> dbUsers = userService.getAllAllocatedUsers(pageSize, pageNumber);
+        AllocatedPoolUserResponse response = AllocatedPoolUserResponse.builder()
+                .allocatedUsers(userMapper.entityToPublicModel(dbUsers.getContent()))
+                .totalElements(dbUsers.getTotalElements())
+                .build();
+        return ResponseEntity.ok(response);
     }
 }

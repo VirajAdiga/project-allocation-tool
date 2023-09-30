@@ -5,6 +5,7 @@ import com.project.userservice.dto.UpdateUserRequest;
 import com.project.userservice.entities.*;
 import org.springframework.data.domain.Page;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -86,4 +87,8 @@ public interface UserService {
     void partialUpdateAdminUser(Integer userId, PublicUser publicUser);
 
     void updateUserProjectAllocation(Long userId, Long userProjectId);
+
+    Page<User> getFreePoolUsers(Integer pageSize, Integer pageNumber);
+
+    Page<User> getAllAllocatedUsers(Integer pageSize, Integer pageNumber);
 }
