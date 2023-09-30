@@ -3,7 +3,6 @@ package com.project.userservice.controllers;
 import com.project.userservice.dto.PublicUser;
 import com.project.userservice.dto.PublicUserListResponse;
 import com.project.userservice.dto.UpdateUserRequest;
-import com.project.userservice.dto.UserListResponse;
 import com.project.userservice.exception.ResourceNotFoundException;
 import com.project.userservice.mappers.UserMapper;
 import com.project.userservice.entities.*;
@@ -120,10 +119,10 @@ public class UserController {
      */
     @GetMapping
     @Operation(summary = "Get all users", description = "Retrieve a paginated list of users with optional pageSize and pageNumber parameters")
-    @ApiResponse(responseCode = "200", description = "List of users retrieved successfully", content = @Content(schema = @Schema(implementation = UserListResponse.class)))
-    public ResponseEntity<UserListResponse> getAllUsers(@RequestParam(required = false) Integer pageSize, @RequestParam(required = false) Integer pageNumber) {
+    @ApiResponse(responseCode = "200", description = "List of users retrieved successfully", content = @Content(schema = @Schema(implementation = PublicUserListResponse.class)))
+    public ResponseEntity<PublicUserListResponse> getAllUsers(@RequestParam(required = false) Integer pageSize, @RequestParam(required = false) Integer pageNumber) {
         Page<User> dbUsers = userService.getAllUsers(pageSize, pageNumber);
-        UserListResponse response = UserListResponse.builder()
+        PublicUserListResponse response = PublicUserListResponse.builder()
                 .users(userMapper.entityToPublicModel(dbUsers.getContent()))
                 .totalElements(dbUsers.getTotalElements())
                 .build();

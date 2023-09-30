@@ -9,6 +9,7 @@ import java.util.List;
  */
 @Getter
 @AllArgsConstructor
+@Builder
 public class PublicUserListResponse {
     List<PublicUser> users;  // List of public users in the response
     Long totalElements;      // Total number of elements in the list
