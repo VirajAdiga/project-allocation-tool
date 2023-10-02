@@ -34,9 +34,9 @@ public interface OpeningRepository extends JpaRepository<Opening, Long> {
      * @return A Page containing filtered openings.
      */
     @Query(value = "SELECT DISTINCT o.* FROM openings o LEFT JOIN applications a ON o.id = a.opening_id\n" +
-            "    WHERE ((:appliedBy IS null) OR (:appliedBy IS TRUE AND a.candidate_id = :loggedinUserId) OR (:appliedBy IS FALSE AND (a.candidate_id IS null\n" +
-            "            OR o.id not in (SELECT op.id FROM openings op JOIN applications ap ON ap.opening_id = op.id WHERE ap.candidate_id = :loggedinUserId))))\n" +
-            "    AND ((:postedBy IS null) OR (:postedBy IS TRUE AND o.recruiter_id = :loggedinUserId) OR (:postedBy IS FALSE AND o.recruiter_id != :loggedinUserId))",
+            "    WHERE ((:appliedBy IS null) OR (:appliedBy IS TRUE AND a.candidateId = :loggedinUserId) OR (:appliedBy IS FALSE AND (a.candidateId IS null\n" +
+            "            OR o.id not in (SELECT op.id FROM openings op JOIN applications ap ON ap.opening_id = op.id WHERE ap.candidateId = :loggedinUserId))))\n" +
+            "    AND ((:postedBy IS null) OR (:postedBy IS TRUE AND o.recruiterId = :loggedinUserId) OR (:postedBy IS FALSE AND o.recruiterId != :loggedinUserId))",
             nativeQuery = true, countProjection = "*")
     Page<Opening> fetchOpenings(Boolean appliedBy, Boolean postedBy, Pageable pageable, Long loggedinUserId);
 

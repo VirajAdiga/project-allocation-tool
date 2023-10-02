@@ -3,7 +3,8 @@ package com.theja.projectallocationservice.services;
 import com.theja.projectallocationservice.dto.PublicUserListResponse;
 import com.theja.projectallocationservice.entities.enums.PermissionName;
 import com.theja.projectallocationservice.dto.PublicUser;
-import org.springframework.beans.factory.annotation.Value;
+import io.github.cdimascio.dotenv.Dotenv;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -13,8 +14,12 @@ import java.util.List;
 @Component
 public class UserServiceClientImpl implements UserServiceClient {
 
-    @Value("${user_service}")
-    private String userServiceHost;
+    @Autowired
+    private Dotenv dotenv;
+
+    private String getUserServiceHost(){
+        return dotenv.get("USER_SERVICE");
+    }
 
     /**
      * Get the list of permissions associated with a user.
@@ -24,7 +29,7 @@ public class UserServiceClientImpl implements UserServiceClient {
      */
     @Override
     public List<PermissionName> getPermissions(String authHeader) {
-        String url = String.format("%sapi/v1/authorization/permissions", userServiceHost);
+        String url = String.format("%sapi/v1/authorization/permissions", getUserServiceHost());
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", authHeader);
         HttpEntity<?> entity = new HttpEntity<>(headers);
@@ -48,7 +53,7 @@ public class UserServiceClientImpl implements UserServiceClient {
      */
     @Override
     public PublicUser getUser(String authHeader) {
-        String url = String.format("%sapi/v1/authorization/user", userServiceHost);
+        String url = String.format("%sapi/v1/authorization/user", getUserServiceHost());
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", authHeader);
         HttpEntity<?> entity = new HttpEntity<>(headers);
@@ -70,23 +75,21 @@ public class UserServiceClientImpl implements UserServiceClient {
      */
     @Override
     public PublicUser getUserById(Long userId) {
-        String url = String.format("%sapi/v1/users/public/%s", userServiceHost, userId.toString());
+        String url = String.format("%sapi/v1/users/public/%s", getUserServiceHost(), userId.toString());
         HttpHeaders headers = new HttpHeaders();
         HttpEntity<?> entity = new HttpEntity<>(headers);
-
         ResponseEntity<PublicUser> user = new RestTemplate().exchange(
                 url,
                 HttpMethod.GET,
                 entity,
                 PublicUser.class
         );
-        System.out.println(user);
         return user.getBody();
     }
 
     @Override
     public PublicUserListResponse getUsersById(List<Long> userIds) {
-        String url = String.format("%sapi/v1/users/public", userServiceHost);
+        String url = String.format("%sapi/v1/users/public", getUserServiceHost());
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<?> entity = new HttpEntity<>("{\"userIds\": \"" + userIds + "\"}", headers);
@@ -103,7 +106,7 @@ public class UserServiceClientImpl implements UserServiceClient {
 
     @Override
     public void updateUserProjectAllocation(Long userId, Long projectId) {
-        String url = String.format("%sapi/v1/users/public/%s", userServiceHost, userId.toString());
+        String url = String.format("%sapi/v1/users/public/%s", getUserServiceHost(), userId.toString());
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<?> entity = new HttpEntity<>("{\"projectAllocatedId\": \"" + projectId + "\"}", headers);

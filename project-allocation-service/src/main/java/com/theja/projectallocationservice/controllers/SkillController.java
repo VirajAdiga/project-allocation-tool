@@ -23,7 +23,7 @@ import java.util.Optional;
  * It provides endpoints for retrieving and adding skills.
  */
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/skills")
 @Tag(name = "Skills", description = "Endpoints related to managing skills")
 public class SkillController {
     // Autowired fields for services and mappers...
@@ -38,7 +38,7 @@ public class SkillController {
      * @return The response containing a list of skill models.
      */
     // Get all skills
-    @GetMapping("/skills")
+    @GetMapping("")
     @Operation(summary = "Get all skills", description = "Retrieve a list of all available skills")
     @ApiResponse(responseCode = "200", description = "List of skills retrieved successfully", content = @Content(array = @ArraySchema(schema = @Schema(implementation = com.theja.projectallocationservice.dto.Skill.class))))
     public ResponseEntity<List<com.theja.projectallocationservice.dto.Skill>> getAllSkills() {
@@ -52,7 +52,7 @@ public class SkillController {
      *
      * @return ResponseEntity containing the skill
      */
-    @GetMapping("/skills/{skillId}")
+    @GetMapping("/{skillId}")
     @ApiResponse(responseCode = "200", description = "Skill retrieved successfully", content = @Content(schema = @Schema(implementation = Skill.class)))
     public ResponseEntity<com.theja.projectallocationservice.dto.Skill> getSkillById(@PathVariable("skillId") Long id) {
         // Fetch a skill by its ID and return it as a model
@@ -71,7 +71,7 @@ public class SkillController {
      * @return The response containing the created skill model.
      */
     // Add a new skill
-    @PostMapping("/skills")
+    @PostMapping("")
     @Operation(summary = "Add a new skill", description = "Add a new skill to the system")
     @ApiResponse(responseCode = "200", description = "Skill added successfully", content = @Content(schema = @Schema(implementation = com.theja.projectallocationservice.dto.Skill.class)))
     public ResponseEntity<com.theja.projectallocationservice.dto.Skill> addSkill(@RequestBody Skill skill) {

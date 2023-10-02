@@ -29,7 +29,7 @@ import java.util.List;
  * It provides endpoints for retrieving, creating, updating, and deleting openings.
  */
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/openings")
 @Tag(name = "Openings", description = "Endpoints related to opening management")
 public class OpeningController {
     // Autowired fields for services, mappers, and context...
@@ -58,7 +58,7 @@ public class OpeningController {
      * @return A response containing a list of openings and pagination details.
      */
     // Get all openings
-    @GetMapping("/openings")
+    @GetMapping("")
     @Operation(summary = "Get openings", description = "Retrieve a list of openings with optional pagination and filters")
     @ApiResponse(responseCode = "200", description = "Openings retrieved successfully", content = @Content(schema = @Schema(implementation = OpeningsListResponse.class)))
     public ResponseEntity<OpeningsListResponse> getAllOpenings(@RequestParam(required = false) Integer pageSize, @RequestParam(required = false) Integer pageNumber, @RequestParam(required = false) Boolean appliedBySelf, @RequestParam(required = false) Boolean postedBySelf) {
@@ -78,7 +78,7 @@ public class OpeningController {
      * @return A response containing a list of openings for the specified project.
      */
     // Get openings for a specific project
-    @GetMapping("/projects/{projectId}/openings")
+    @GetMapping("/projects/{projectId}")
     @Operation(summary = "Get openings for a project", description = "Retrieve a list of openings for a specific project")
     @ApiResponse(responseCode = "200", description = "Openings retrieved successfully", content = @Content(schema = @Schema(implementation = List.class)))
     public ResponseEntity<List<com.theja.projectallocationservice.dto.Opening>> getAllOpeningsForProject(@PathVariable Long projectId) {
@@ -95,7 +95,7 @@ public class OpeningController {
      * @throws OpeningNotFoundException If the opening with the given ID is not found.
      */
     // Get a specific opening by ID
-    @GetMapping("/openings/{id}")
+    @GetMapping("/{id}")
     @Operation(summary = "Get opening by ID", description = "Retrieve a specific opening by its ID")
     @ApiResponse(responseCode = "200", description = "Opening retrieved successfully", content = @Content(schema = @Schema(implementation = com.theja.projectallocationservice.dto.Opening.class)))
     public ResponseEntity<com.theja.projectallocationservice.dto.Opening> getOpeningById(@PathVariable("id") Long id) {
@@ -117,7 +117,7 @@ public class OpeningController {
      * @throws UnauthorizedAccessException If the user does not have permission to create an opening.
      * @throws SkillNotFoundException      If a skill associated with the opening is not found.
      */
-    @PostMapping("/projects/{projectId}/openings")
+    @PostMapping("/projects/{projectId}")
     @Operation(summary = "Create opening", description = "Create a new opening for a specific project")
     @ApiResponse(responseCode = "201", description = "Opening created successfully", content = @Content(schema = @Schema(implementation = com.theja.projectallocationservice.dto.Opening.class)))
     public ResponseEntity<com.theja.projectallocationservice.dto.Opening> createOpening(@RequestBody @Validated Opening opening, @PathVariable Long projectId) {
@@ -196,7 +196,7 @@ public class OpeningController {
      * @throws OpeningNotFoundException    If the opening with the given ID is not found.
      * @throws OpeningUpdateException      If the update of the opening fails.
      */
-    @PutMapping("/openings/{id}")
+    @PutMapping("/{id}")
     @Operation(summary = "Update opening", description = "Update the details of an existing opening")
     @ApiResponse(responseCode = "200", description = "Opening updated successfully", content = @Content(schema = @Schema(implementation = com.theja.projectallocationservice.dto.Opening.class)))
     public ResponseEntity<com.theja.projectallocationservice.dto.Opening> updateOpening(
@@ -257,7 +257,7 @@ public class OpeningController {
     }
 
     // Update opening status
-    @PatchMapping("/openings/{id}/status")
+    @PatchMapping("/{id}/status")
     @Operation(summary = "Update opening status", description = "Update the status of an existing opening")
     @ApiResponse(responseCode = "200", description = "Opening status updated successfully", content = @Content(schema = @Schema(implementation = com.theja.projectallocationservice.dto.Opening.class)))
     public ResponseEntity<com.theja.projectallocationservice.dto.Opening> updateOpeningStatus(@PathVariable Long id, @RequestParam OpeningStatus newStatus) {
@@ -294,7 +294,7 @@ public class OpeningController {
 
 
     // Delete an opening
-    @DeleteMapping("/openings/{id}")
+    @DeleteMapping("/{id}")
     @Operation(summary = "Delete opening", description = "Delete an existing opening by its ID")
     @ApiResponse(responseCode = "204", description = "Opening deleted successfully")
     public ResponseEntity<Void> deleteOpening(@PathVariable("id") Long id) {
@@ -307,4 +307,3 @@ public class OpeningController {
         }
     }
 }
-

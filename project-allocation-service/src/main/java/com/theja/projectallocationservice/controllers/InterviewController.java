@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
  * It provides endpoints for retrieving, creating, updating, and managing interview details.
  */
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/interviews")
 @Tag(name = "Interview Controller", description = "Endpoints related to interview management")
 public class InterviewController {
     // Autowired fields for services, mappers, and context...
@@ -55,7 +55,7 @@ public class InterviewController {
      * @param interviewerId The ID of the interviewer.
      * @return List of interviews associated with the provided interviewer ID.
      */
-    @GetMapping("/interviews/interviewer/{interviewerId}")
+    @GetMapping("/interviewer/{interviewerId}")
     @Operation(summary = "Get interviews by interviewer ID", description = "Retrieve all interviews with a particular interviewer ID")
     @ApiResponse(responseCode = "200", description = "Interviews retrieved successfully", content = @Content(schema = @Schema(implementation = com.theja.projectallocationservice.dto.Interview.class)))
     public ResponseEntity<List<com.theja.projectallocationservice.dto.Interview>> getInterviewsByInterviewerId(@PathVariable Long interviewerId) {
@@ -77,7 +77,7 @@ public class InterviewController {
      * @param applicationId The unique identifier of the application
      * @return A ResponseEntity containing the list of interviews and an HTTP status code
      */
-    @GetMapping("/interviews")
+    @GetMapping("")
     public ResponseEntity<List<com.theja.projectallocationservice.dto.Interview>> getInterviewsByApplicationId(@RequestParam Long applicationId) {
         // Fetch all interviews associated with the provided application ID
         List<Interview> dbInterviews = interviewService.getInterviewsByApplicationId(applicationId);
@@ -97,7 +97,7 @@ public class InterviewController {
      * @param interviewId The ID of the interview to retrieve.
      * @return The interview model corresponding to the provided interview ID.
      */
-    @GetMapping("/interviews/{interviewId}")
+    @GetMapping("/{interviewId}")
     @Operation(summary = "Get interview by ID", description = "Retrieve an interview by its ID")
     @ApiResponse(responseCode = "200", description = "Interview retrieved successfully", content = @Content(schema = @Schema(implementation = com.theja.projectallocationservice.dto.Interview.class)))
     public ResponseEntity<com.theja.projectallocationservice.dto.Interview> getInterview(@PathVariable Long interviewId) {
@@ -113,7 +113,7 @@ public class InterviewController {
      * @param interview   The interview details to be created.
      * @return The created interview model in the response.
      */
-    @PostMapping("/applications/{applicationId}/interviews")
+    @PostMapping("/applications/{applicationId}")
     @Operation(summary = "Create interview", description = "Create a new interview for a given application")
     @ApiResponse(responseCode = "201", description = "Interview created successfully", content = @Content(schema = @Schema(implementation = com.theja.projectallocationservice.dto.Interview.class)))
     public ResponseEntity<com.theja.projectallocationservice.dto.Interview> createInterview(@PathVariable Long applicationId, @RequestBody Interview interview) {
@@ -164,7 +164,7 @@ public class InterviewController {
      * @param interview The updated interview details.
      * @return The updated interview model in the response.
      */
-    @PutMapping("/interviews/{interviewId}")
+    @PutMapping("/{interviewId}")
     @Operation(summary = "Update interview", description = "Update an existing interview's details")
     @ApiResponse(responseCode = "200", description = "Interview updated successfully", content = @Content(schema = @Schema(implementation = com.theja.projectallocationservice.dto.Interview.class)))
     public ResponseEntity<com.theja.projectallocationservice.dto.Interview> updateInterview(@PathVariable Long interviewId, @RequestBody Interview interview) {
@@ -178,7 +178,7 @@ public class InterviewController {
         return ResponseEntity.ok(interviewMapper.entityToModel(dbUpdatedInterview));
     }
 
-    @PatchMapping("/interviews/{interviewId}/feedback")
+    @PatchMapping("/{interviewId}/feedback")
     public ResponseEntity<String> updateInterviewFeedback(@PathVariable Long interviewId, @RequestBody UpdateFeedbackRequest request) {
         // Fetch the interview by ID
         Interview interview = interviewService.getInterviewById(interviewId);
@@ -204,7 +204,7 @@ public class InterviewController {
      * @param newStatus   The new status to set for the interview.
      * @return The updated interview model in the response.
      */
-    @PatchMapping("/interviews/{interviewId}/status")
+    @PatchMapping("/{interviewId}/status")
     @Operation(summary = "Update interview status", description = "Update the status of an existing interview")
     @ApiResponse(responseCode = "200", description = "Interview status updated successfully", content = @Content(schema = @Schema(implementation = com.theja.projectallocationservice.dto.Interview.class)))
     public ResponseEntity<com.theja.projectallocationservice.dto.Interview> updateInterviewStatus(@PathVariable Long interviewId, @RequestParam InterviewStatus newStatus) {

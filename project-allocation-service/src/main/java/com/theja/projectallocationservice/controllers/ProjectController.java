@@ -33,7 +33,7 @@ import java.util.List;
  */
 @Slf4j
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/projects")
 @Tag(name = "Projects", description = "Endpoints related to project management")
 public class ProjectController {
     // Autowired fields for services, mappers, and context...
@@ -56,7 +56,7 @@ public class ProjectController {
      * @return The response containing a list of project models with pagination details.
      */
     // Get all projects
-    @GetMapping("/projects")
+    @GetMapping("")
     @Operation(summary = "Get all projects", description = "Retrieve a paginated list of projects")
     @ApiResponse(responseCode = "200", description = "Projects retrieved successfully", content = @Content(schema = @Schema(implementation = ProjectListResponse.class)))
     public ResponseEntity<ProjectListResponse> getAllProjects(@RequestParam(required = false) Integer pageSize, @RequestParam(required = false) Integer pageNumber) {
@@ -75,7 +75,7 @@ public class ProjectController {
      *
      * @return The response containing a list of project models.
      */
-    @GetMapping("/projects/all")
+    @GetMapping("/all")
     @Operation(summary = "Get all projects without pagination", description = "Retrieve a list of all projects without pagination")
     @ApiResponse(responseCode = "200", description = "Projects retrieved successfully", content = @Content(schema = @Schema(implementation = List.class)))
     public ResponseEntity<List<com.theja.projectallocationservice.dto.Project>> getAllProjects() {
@@ -90,7 +90,7 @@ public class ProjectController {
      * @param userId The ID of the user to fetch projects for.
      * @return The response containing a list of project models.
      */
-    @GetMapping("/projects/users/{userId}")
+    @GetMapping("/users/{userId}")
     @Operation(summary = "Get projects for a user", description = "Retrieve a list of projects associated with a user")
     @ApiResponse(responseCode = "200", description = "Projects retrieved successfully", content = @Content(schema = @Schema(implementation = List.class)))
     public ResponseEntity<List<com.theja.projectallocationservice.dto.Project>> getProjectsForUser(@PathVariable Long userId) {
@@ -106,7 +106,7 @@ public class ProjectController {
      * @return The project model corresponding to the provided project ID.
      */
     // Get a specific project by ID
-    @GetMapping("/projects/{id}")
+    @GetMapping("/{id}")
     @Operation(summary = "Get project by ID", description = "Retrieve a specific project by its ID")
     @ApiResponse(responseCode = "200", description = "Project retrieved successfully", content = @Content(schema = @Schema(implementation = com.theja.projectallocationservice.dto.Project.class)))
     public ResponseEntity<com.theja.projectallocationservice.dto.Project> getProjectById(@PathVariable("id") Long id) {
@@ -126,7 +126,7 @@ public class ProjectController {
      * @return The created project model in the response.
      */
     // Create a new project
-    @PostMapping("/projects")
+    @PostMapping("")
     @Operation(summary = "Create project", description = "Create a new project")
     @ApiResponse(responseCode = "201", description = "Project created successfully", content = @Content(schema = @Schema(implementation = com.theja.projectallocationservice.dto.Project.class)))
     public ResponseEntity<com.theja.projectallocationservice.dto.Project> createProject(@RequestBody CreateProjectDTO projectDTO) {
@@ -170,7 +170,7 @@ public class ProjectController {
      * @return The created project model in the response.
      */
     // Update an existing project
-    @PutMapping("/projects/{id}")
+    @PutMapping("/{id}")
     @Operation(summary = "Update project", description = "Update the details of an existing project")
     @ApiResponse(responseCode = "200", description = "Project updated successfully", content = @Content(schema = @Schema(implementation = com.theja.projectallocationservice.dto.Project.class)))
     public ResponseEntity<com.theja.projectallocationservice.dto.Project> updateProject(@PathVariable("id") Long id, @RequestBody Project project) {
@@ -190,7 +190,7 @@ public class ProjectController {
      * @return The appropriate response based on the deletion status.
      */
     // Delete a project
-    @DeleteMapping("/projects/{id}")
+    @DeleteMapping("/{id}")
     @Operation(summary = "Delete project", description = "Delete an existing project by its ID")
     @ApiResponse(responseCode = "204", description = "Project deleted successfully")
     public ResponseEntity<Void> deleteProject(@PathVariable("id") Long id) {

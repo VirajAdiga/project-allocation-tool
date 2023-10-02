@@ -31,7 +31,7 @@ import java.util.List;
  * Controller class for managing application-related endpoints.
  */
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/applications")
 @Tag(name = "Application Controller", description = "Endpoints related to application management")
 public class ApplicationController {
     // Autowired fields for various services and mappers...
@@ -60,7 +60,7 @@ public class ApplicationController {
      * @param pageSize    Number of items per page.
      * @return ResponseEntity containing the list of applications and pagination details.
      */
-    @GetMapping("/applications")
+    @GetMapping("")
     @Operation(summary = "Get all applications", description = "Retrieve a paginated list of applications with optional status filter")
     public ResponseEntity<ApplicationListResponse> getAllApplications(
             @RequestParam(required = false) ApplicationStatus status,
@@ -103,7 +103,7 @@ public class ApplicationController {
      * @param id    ID of the application to retrieve.
      * @return ResponseEntity containing the retrieved application.
      */
-    @GetMapping("/applications/{id}")
+    @GetMapping("/{id}")
     @Operation(summary = "Get application by ID", description = "Retrieve an application by its ID")
     @ApiResponse(responseCode = "200", description = "Application retrieved successfully", content = @Content(schema = @Schema(implementation = com.theja.projectallocationservice.dto.Application.class)))
     @ApiResponse(responseCode = "404", description = "Application not found")
@@ -120,7 +120,7 @@ public class ApplicationController {
      * @param candidateId    ID of the candidate associated with the application.
      * @return ResponseEntity containing the retrieved application details.
      */
-    @GetMapping("/applications/details")
+    @GetMapping("/details")
     @Operation(summary = "Get application details", description = "Retrieve application details based on openingId and candidateId")
     @ApiResponse(responseCode = "200", description = "Application details retrieved successfully", content = @Content(schema = @Schema(implementation = com.theja.projectallocationservice.dto.Application.class)))
     @ApiResponse(responseCode = "404", description = "Application not found")
@@ -145,7 +145,7 @@ public class ApplicationController {
      * @param openingId    ID of the opening to apply for.
      * @return ResponseEntity containing the created application.
      */
-    @PostMapping("/openings/{openingId}/applications")
+    @PostMapping("/openings/{openingId}")
     @Operation(summary = "Create application", description = "Apply for an opening by creating an application")
     @ApiResponse(responseCode = "201", description = "Application created successfully", content = @Content(schema = @Schema(implementation = com.theja.projectallocationservice.dto.Application.class)))
     @ApiResponse(responseCode = "400", description = "Bad request")
@@ -228,7 +228,7 @@ public class ApplicationController {
      * @param newStatus    New status to set for the application.
      * @return ResponseEntity containing the updated application.
      */
-    @PatchMapping("/applications/{applicationId}/status")
+    @PatchMapping("/{applicationId}/status")
     @Operation(summary = "Update application status", description = "Update the status of an application based on newStatus")
     @ApiResponse(responseCode = "200", description = "Application status updated successfully", content = @Content(schema = @Schema(implementation = com.theja.projectallocationservice.dto.Application.class)))
     @ApiResponse(responseCode = "400", description = "Bad request")
@@ -293,4 +293,3 @@ public class ApplicationController {
         throw new ApplicationNotFoundException(applicationId);
     }
 }
-
