@@ -87,7 +87,6 @@ public class UserServiceImpl implements UserService {
         if (pageSize == null) pageSize = 1000;
         if (pageNumber == null) pageNumber = 0;
         PageRequest pageRequest = PageRequest.of(pageNumber, pageSize);
-        System.out.println(pageRequest);
         return userRepository.findAll(pageRequest);
     }
 

@@ -22,7 +22,7 @@ import java.util.List;
  * Controller class responsible for handling user authorization and permission-related endpoints.
  */
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/authorization")
 @RequiredArgsConstructor
 @Tag(name = "Authorization", description = "Endpoints related to user authorization and permissions")
 public class AuthorizationController {
@@ -34,7 +34,7 @@ public class AuthorizationController {
      *
      * @return List of permissions associated with the user's role.
      */
-    @GetMapping("/authorization/permissions")
+    @GetMapping("/permissions")
     @Operation(summary = "Get user permissions", description = "Retrieve a list of permissions associated with the authenticated user's role")
     @ApiResponse(responseCode = "200", description = "List of user permissions retrieved successfully", content = @Content(array = @ArraySchema(schema = @Schema(implementation = PermissionName.class))))
     public List<PermissionName> getPermissions() {
@@ -57,7 +57,7 @@ public class AuthorizationController {
      *
      * @return Role of the authenticated user.
      */
-    @GetMapping("/authorization/role")
+    @GetMapping("/role")
     @Operation(summary = "Get user role", description = "Retrieve the role of the authenticated user")
     @ApiResponse(responseCode = "200", description = "User role retrieved successfully", content = @Content(schema = @Schema(implementation = Role.class)))
     public Role getRole() {
@@ -70,7 +70,7 @@ public class AuthorizationController {
      *
      * @return PublicUser model representing the authenticated user's information.
      */
-    @GetMapping("/authorization/user")
+    @GetMapping("/user")
     @Operation(summary = "Get authenticated user", description = "Retrieve a public representation of the authenticated user's information")
     @ApiResponse(responseCode = "200", description = "Authenticated user information retrieved successfully", content = @Content(schema = @Schema(implementation = PublicUser.class)))
     public PublicUser getUser() {

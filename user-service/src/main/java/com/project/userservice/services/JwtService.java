@@ -1,11 +1,12 @@
 package com.project.userservice.services;
 
+import io.github.cdimascio.dotenv.Dotenv;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
@@ -19,11 +20,16 @@ import java.util.function.Function;
 @Service
 public class JwtService {
 
-    @Value("${jwt.secret.key}")
-    private String SECRET_KEY;
+    @Autowired
+    private Dotenv dotenv;
 
-    @Value("${jwt.expiration.time}")
-    private long tokenExpiration;
+    private String getJwtSecretKey() {
+        return dotenv.get("JWT_SECRET_KEY");
+    }
+
+    private Long getTokenExpirationTime(){
+        return Long.valueOf(dotenv.get("JWT_EXPIRATION_TIME"));
+    }
 
     /**
      * Extract the subject (typically user's email) from the JWT token.
@@ -52,7 +58,7 @@ public class JwtService {
                 .setClaims(extraClaims)
                 .setSubject(subject)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + tokenExpiration))
+                .setExpiration(new Date(System.currentTimeMillis() + getTokenExpirationTime()))
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -90,7 +96,7 @@ public class JwtService {
      * Retrieve the signing key for JWT token creation and validation.
      */
     private Key getSignInKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
+        byte[] keyBytes = Decoders.BASE64.decode(getJwtSecretKey());
         return Keys.hmacShaKeyFor(keyBytes);
     }
 }

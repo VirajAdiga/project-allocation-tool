@@ -33,7 +33,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     * @param pageable Pageable object for pagination.
     * @return A page of users in the free pool.
     */
-   @Query(value = "SELECT * FROM users WHERE role='EMPLOYEE' and project_allocated_id IS NULL;", nativeQuery = true)
+   @Query(value = "SELECT * FROM users WHERE role='EMPLOYEE' and projectAllocatedId IS NULL;", nativeQuery = true)
    Page<User> getFreePoolUsers(Pageable pageable);
 
    /**
@@ -42,6 +42,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     * @param pageable  Pageable object for pagination.
     * @return A page of users allocated within the specified date range.
     */
-   @Query(value = "SELECT * FROM users WHERE role='EMPLOYEE' and project_allocated_id IS NOT NULL;", nativeQuery = true)
+   @Query(value = "SELECT * FROM users WHERE role='EMPLOYEE' and projectAllocatedId IS NOT NULL;", nativeQuery = true)
    Page<User> getAllAllocatedUsers(Pageable pageable);
 }

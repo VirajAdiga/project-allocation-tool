@@ -1,7 +1,8 @@
 package com.project.userservice.services;
 
 import com.project.userservice.dto.Skill;
-import org.springframework.beans.factory.annotation.Value;
+import io.github.cdimascio.dotenv.Dotenv;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -12,12 +13,16 @@ import org.springframework.web.client.RestTemplate;
 @Component
 public class ProjectAllocationServiceClientImpl implements ProjectAllocationServiceClient {
 
-    @Value("${project_allocation_service}")
-    private String projectAllocationServiceHost;
+    @Autowired
+    private Dotenv dotenv;
+
+    private String getProjectAllocationServiceHost(){
+        return dotenv.get("PROJECT_ALLOCATION_SERVICE");
+    }
 
     @Override
     public Skill getSkill(Long skillId) {
-        String url = String.format("%sapi/v1/skills/%s", projectAllocationServiceHost, skillId.toString());
+        String url = String.format("%sapi/v1/skills/%s", getProjectAllocationServiceHost(), skillId.toString());
         HttpHeaders headers = new HttpHeaders();
         HttpEntity<?> requestEntity = new HttpEntity<>(headers);
         ResponseEntity<Object> skillObject = new RestTemplate().exchange(

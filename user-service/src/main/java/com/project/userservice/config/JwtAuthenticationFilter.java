@@ -66,9 +66,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter implements Ord
         }
 
         // Check for certain conditions where the filter should not be applied.
-        if (!request.getServletPath().startsWith("/api/v1/auth/register") && !request.getServletPath().startsWith("/api/v1/auth/authenticate") && !request.getServletPath().startsWith("/api/v1/users/public") && (authHeader == null || !authHeader.startsWith("Bearer "))) {
+        if (!request.getServletPath().startsWith("/api/v1/authentication/register") && !request.getServletPath().startsWith("/api/v1/authentication/authenticate") && !request.getServletPath().startsWith("/api/v1/users/public") && (authHeader == null || !authHeader.startsWith("Bearer "))) {
             throw new RuntimeException("Invalid request");
-        } else if (request.getServletPath().startsWith("/api/v1/auth/register") || request.getServletPath().startsWith("/api/v1/auth/authenticate") || request.getServletPath().startsWith("/api/v1/users/public")) {
+        } else if (request.getServletPath().startsWith("/api/v1/authentication/register") || request.getServletPath().startsWith("/api/v1/authentication/authenticate") || request.getServletPath().startsWith("/api/v1/users/public")) {
             // For registration and authentication requests, bypass the filter and continue the chain.
             filterChain.doFilter(request, response);
             return;
@@ -107,4 +107,3 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter implements Ord
         return Ordered.LOWEST_PRECEDENCE - 100;
     }
 }
-

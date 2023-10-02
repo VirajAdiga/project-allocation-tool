@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.*;
  * Controller class responsible for handling user authentication and authorization endpoints.
  */
 @RestController
-@RequestMapping("/api/v1/auth")
+@RequestMapping("/api/v1/authentication")
 @RequiredArgsConstructor
 @Tag(name = "Authentication", description = "Endpoints related to user authentication and authorization")
 public class AuthenticationController {
