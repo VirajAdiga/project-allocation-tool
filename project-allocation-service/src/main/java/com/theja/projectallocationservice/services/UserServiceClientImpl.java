@@ -3,8 +3,8 @@ package com.theja.projectallocationservice.services;
 import com.theja.projectallocationservice.dto.PublicUserListResponse;
 import com.theja.projectallocationservice.entities.enums.PermissionName;
 import com.theja.projectallocationservice.dto.PublicUser;
-import io.github.cdimascio.dotenv.Dotenv;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -15,10 +15,10 @@ import java.util.List;
 public class UserServiceClientImpl implements UserServiceClient {
 
     @Autowired
-    private Dotenv dotenv;
+    private Environment environment;
 
     private String getUserServiceHost(){
-        return dotenv.get("USER_SERVICE");
+        return environment.getProperty("USER_SERVICE");
     }
 
     /**

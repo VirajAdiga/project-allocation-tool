@@ -1,20 +1,22 @@
 package com.theja.projectallocationservice.config;
 
-import io.github.cdimascio.dotenv.Dotenv;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.server.ConfigurableWebServerFactory;
 import org.springframework.boot.web.server.WebServerFactoryCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
+
+import java.util.Objects;
 
 @Configuration
 public class ServerConfig {
 
     @Autowired
-    private Dotenv dotenv;
+    private Environment environment;
 
     private Integer getServerPort(){
-        return Integer.valueOf(dotenv.get("SERVER_PORT"));
+        return Integer.valueOf(Objects.requireNonNull(environment.getProperty("SERVER_PORT")));
     }
 
     @Bean
