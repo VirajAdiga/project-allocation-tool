@@ -1,0 +1,43 @@
+version: '3.8'
+
+networks:
+  project_allocation_tool_network:
+    driver: bridge
+
+services:
+  mysql-db:
+    image: mysql:latest
+    env_file:
+      - ./mysql/.env
+    ports:
+      - "3306:3306"
+    volumes:
+      - /var/lib/docker/volumes/mysql_data/_data:/var/lib/mysql
+    networks:
+      - project_allocation_tool_network
+
+  user-service:
+    build:
+      context: ./user-service
+      dockerfile: Dockerfile
+    env_file:
+      - ./user-service/.env
+    ports:
+      - "9092:9092"
+    networks:
+      - project_allocation_tool_network
+    depends_on:
+      - mysql-db
+
+  project-allocation-service:
+    build:
+      context: ./project-allocation-service
+      dockerfile: Dockerfile
+    env_file:
+      - ./project-allocation-service/.env
+    ports:
+      - "9091:9091"
+    networks:
+      - project_allocation_tool_network
+    depends_on:
+      - mysql-db
