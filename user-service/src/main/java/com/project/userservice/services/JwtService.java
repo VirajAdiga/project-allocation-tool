@@ -1,17 +1,18 @@
 package com.project.userservice.services;
 
-import io.github.cdimascio.dotenv.Dotenv;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
 import java.util.Date;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 
 /**
@@ -21,14 +22,14 @@ import java.util.function.Function;
 public class JwtService {
 
     @Autowired
-    private Dotenv dotenv;
+    private Environment environment;
 
     private String getJwtSecretKey() {
-        return dotenv.get("JWT_SECRET_KEY");
+        return environment.getProperty("JWT_SECRET_KEY");
     }
 
     private Long getTokenExpirationTime(){
-        return Long.valueOf(dotenv.get("JWT_EXPIRATION_TIME"));
+        return Long.valueOf(Objects.requireNonNull(environment.getProperty("JWT_EXPIRATION_TIME")));
     }
 
     /**

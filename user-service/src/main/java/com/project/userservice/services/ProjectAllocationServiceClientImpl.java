@@ -1,8 +1,8 @@
 package com.project.userservice.services;
 
 import com.project.userservice.dto.Skill;
-import io.github.cdimascio.dotenv.Dotenv;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -14,10 +14,10 @@ import org.springframework.web.client.RestTemplate;
 public class ProjectAllocationServiceClientImpl implements ProjectAllocationServiceClient {
 
     @Autowired
-    private Dotenv dotenv;
+    private Environment environment;
 
     private String getProjectAllocationServiceHost(){
-        return dotenv.get("PROJECT_ALLOCATION_SERVICE");
+        return environment.getProperty("PROJECT_ALLOCATION_SERVICE");
     }
 
     @Override

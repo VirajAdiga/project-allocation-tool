@@ -1,9 +1,9 @@
 package com.project.userservice.config;
 
-import io.github.cdimascio.dotenv.Dotenv;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
@@ -14,26 +14,26 @@ import javax.sql.DataSource;
 public class DataSourceConfig {
 
     @Autowired
-    private Dotenv dotenv;
+    private Environment environment;
 
     private String getDatabaseHost(){
-        return dotenv.get("DATABASE_HOST");
+        return environment.getProperty("DATABASE_HOST");
     }
 
     private String getDatabasePort(){
-        return dotenv.get("DATABASE_PORT");
+        return environment.getProperty("DATABASE_PORT");
     }
 
     private String getDatabaseName(){
-        return dotenv.get("DATABASE_NAME");
+        return environment.getProperty("DATABASE_NAME");
     }
 
     private String getDatabaseUsername(){
-        return dotenv.get("DATABASE_USERNAME");
+        return environment.getProperty("DATABASE_USERNAME");
     }
 
     private String getDatabasePassword(){
-        return dotenv.get("DATABASE_PASSWORD");
+        return environment.getProperty("DATABASE_PASSWORD");
     }
 
     private String getDatabaseUrl(){
