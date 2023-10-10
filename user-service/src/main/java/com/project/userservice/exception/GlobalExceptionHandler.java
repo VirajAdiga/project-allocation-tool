@@ -51,5 +51,14 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleUnauthorizedAccessException(UnauthorizedAccessException ex) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ex.getMessage());
     }
-}
 
+    @ExceptionHandler(DatabaseAccessException.class)
+    public ResponseEntity<String> handleDatabaseAccessException(DatabaseAccessException ex) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(ServiceClientException.class)
+    public ResponseEntity<String> handleServiceClientException(ServiceClientException ex) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
+    }
+}
