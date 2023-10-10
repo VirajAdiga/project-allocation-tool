@@ -1,9 +1,6 @@
 package com.project.userservice.controllers;
 
 import com.project.userservice.dto.*;
-import com.project.userservice.entities.enums.Role;
-import com.project.userservice.exception.ResourceNotFoundException;
-import com.project.userservice.exception.UnauthorizedAccessException;
 import com.project.userservice.mappers.UserMapper;
 import com.project.userservice.entities.*;
 import com.project.userservice.services.UserService;
@@ -15,6 +12,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -26,7 +25,6 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 
 /**
@@ -34,11 +32,14 @@ import java.util.Optional;
  */
 @RestController
 @RequestMapping("/api/v1/users")
-@AllArgsConstructor
 @Tag(name = "Users", description = "Endpoints related to user management")
 public class UserController {
-    private final UserService userService;
-    private final UserMapper userMapper;
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private UserMapper userMapper;
 
     /**
      * Gets a user by their userId.
@@ -49,23 +50,14 @@ public class UserController {
     @GetMapping("/public/{userId}")
     @Hidden
     public PublicUser getUser(@PathVariable Long userId) {
-        Optional<User> user = userService.getUserById(userId);
-        if (user.isPresent()){
-            return userMapper.entityToPublicModel(user.get());
-        }else{
-            throw new ResourceNotFoundException(userId.toString());
-        }
+        return userMapper.entityToPublicModel(userService.getUserById(userId));
     }
 
     @PostMapping("/public/{userId}")
     public ResponseEntity<String> updateUserProjectAllocation(@PathVariable Integer userId, @RequestBody UserProjectAllocationRequest userProjectAllocationRequest){
-        Optional<User> user = userService.getUserById(Long.valueOf(userId));
-        if (user.isPresent()){
-            userService.updateUserProjectAllocation(Long.valueOf(user.get().getId()), userProjectAllocationRequest.getProjectAllocatedId());
-            return ResponseEntity.ok("Project allocated successfully");
-        } else {
-            throw new ResourceNotFoundException(String.format("User with id %d not found", userId));
-        }
+        User user = userService.getUserById(Long.valueOf(userId));
+        userService.updateUserProjectAllocation(Long.valueOf(user.getId()), userProjectAllocationRequest.getProjectAllocatedId());
+        return ResponseEntity.ok("Project allocated successfully");
     }
 
     /**
@@ -80,11 +72,9 @@ public class UserController {
         List<Long> userIds = requestBody.get("userIds");
         List<PublicUser> publicUsers = new ArrayList<>();
         for (Long userId: userIds ) {
-            Optional<User> user = userService.getUserById(userId);
-            if (user.isPresent()) {
-                PublicUser publicUser = userMapper.entityToPublicModel(user.get());
-                publicUsers.add(publicUser);
-            }
+            User user = userService.getUserById(userId);
+            PublicUser publicUser = userMapper.entityToPublicModel(user);
+            publicUsers.add(publicUser);
         }
         return new PublicUserListResponse(publicUsers, (long) publicUsers.size());
     }
@@ -167,12 +157,8 @@ public class UserController {
     public ResponseEntity<?> partialUpdateAdminUser(
             @PathVariable Integer userId,
             @RequestBody PublicUser publicUser) {
-        try {
-            userService.partialUpdateAdminUser(userId, publicUser);
-            return ResponseEntity.ok().build();
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+        userService.partialUpdateAdminUser(userId, publicUser);
+        return ResponseEntity.ok().build();
     }
 
     /**
@@ -187,12 +173,8 @@ public class UserController {
     public ResponseEntity<?> partialUpdateUser(
             @PathVariable Integer userId,
             @RequestBody UpdateUserRequest updateUserRequest) {
-        try {
-            userService.partialUpdateUser(userId, updateUserRequest);
-            return ResponseEntity.ok().build();
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+        userService.partialUpdateUser(userId, updateUserRequest);
+        return ResponseEntity.ok().build();
     }
 
     /**
@@ -207,13 +189,8 @@ public class UserController {
     @Operation(summary = "Get all free pool users report", description = "Retrieve a paginated list of free pool users' report")
     @ApiResponse(responseCode = "200", description = "Free pool users report retrieved successfully", content = @Content(schema = @Schema(implementation = FreePoolUserResponse.class)))
     public ResponseEntity<FreePoolUserResponse> getAllFreePoolUsers(@RequestParam(required = false) Integer pageSize, @RequestParam(required = false) Integer pageNumber) {
-        // Check user permissions to view reports
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (user.getRole() != Role.ADMIN) {
-            throw new UnauthorizedAccessException("You don't have permission to access any reports.");
-        }
-        // Fetch free pool users and return the response with pagination details
-        Page<User> dbUsers = userService.getFreePoolUsers(pageSize, pageNumber);
+        Page<User> dbUsers = userService.getFreePoolUsers(pageSize, pageNumber, user);
         FreePoolUserResponse response = FreePoolUserResponse.builder()
                 .freePoolUsers(userMapper.entityToPublicModel(dbUsers.getContent()))
                 .totalElements(dbUsers.getTotalElements())
@@ -234,13 +211,8 @@ public class UserController {
     @Operation(summary = "Get all allocated users report", description = "Retrieve a paginated list of allocated users' report within a specified date range")
     @ApiResponse(responseCode = "200", description = "Allocated users report retrieved successfully", content = @Content(schema = @Schema(implementation = AllocatedPoolUserResponse.class)))
     public ResponseEntity<AllocatedPoolUserResponse> getAllAllocatedUsers(@RequestParam(required = false) Integer pageSize, @RequestParam(required = false) Integer pageNumber) throws ParseException {
-        // Check user permissions to view reports
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (user.getRole() != Role.ADMIN) {
-            throw new UnauthorizedAccessException("You don't have permission to access any reports.");
-        }
-        // Fetch allocated users within the date range and return the response with pagination details
-        Page<User> dbUsers = userService.getAllAllocatedUsers(pageSize, pageNumber);
+        Page<User> dbUsers = userService.getAllAllocatedUsers(pageSize, pageNumber, user);
         AllocatedPoolUserResponse response = AllocatedPoolUserResponse.builder()
                 .allocatedUsers(userMapper.entityToPublicModel(dbUsers.getContent()))
                 .totalElements(dbUsers.getTotalElements())

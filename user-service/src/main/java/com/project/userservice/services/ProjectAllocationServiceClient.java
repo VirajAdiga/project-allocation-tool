@@ -7,7 +7,7 @@ public interface ProjectAllocationServiceClient {
     /**
      * Get skill information.
      *
-     * @param skillId Id of the skill.
+     * @param skillId id of the skill.
      * @return Skill information.
      */
     Skill getSkill(Long skillId);

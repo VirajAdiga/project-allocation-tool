@@ -5,9 +5,7 @@ import com.project.userservice.dto.UpdateUserRequest;
 import com.project.userservice.entities.*;
 import org.springframework.data.domain.Page;
 
-import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Service interface defining methods to manage user-related operations.
@@ -20,7 +18,7 @@ public interface UserService {
      * @param email The email of the user to retrieve.
      * @return An optional containing the user if found.
      */
-    Optional<User> getUser(String email);
+    User getUser(String email);
 
     /**
      * Deletes a user by their userId.
@@ -53,7 +51,7 @@ public interface UserService {
      * @param userId The ID of the user to retrieve.
      * @return An optional containing the user if found.
      */
-    Optional<User> getUserById(Long userId);
+    User getUserById(Long userId);
 
     /**
      * Creates a new user.
@@ -88,7 +86,7 @@ public interface UserService {
 
     void updateUserProjectAllocation(Long userId, Long userProjectId);
 
-    Page<User> getFreePoolUsers(Integer pageSize, Integer pageNumber);
+    Page<User> getFreePoolUsers(Integer pageSize, Integer pageNumber, User requestUser);
 
-    Page<User> getAllAllocatedUsers(Integer pageSize, Integer pageNumber);
+    Page<User> getAllAllocatedUsers(Integer pageSize, Integer pageNumber, User requestUser);
 }

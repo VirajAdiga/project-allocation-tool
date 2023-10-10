@@ -1,10 +1,12 @@
 package com.project.userservice.services;
 
 import com.project.userservice.entities.BlacklistToken;
+import com.project.userservice.exception.DatabaseAccessException;
 import com.project.userservice.repositories.BlacklistTokenRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -16,8 +18,13 @@ public class BlacklistTokenService {
     private BlacklistTokenRepository blacklistTokenRepository;
 
     public boolean isTokenBlacklisted(String token){
-        Optional<BlacklistToken> blacklistToken = blacklistTokenRepository.findByToken(token);
-        return blacklistToken.isPresent();
+        try {
+            Optional<BlacklistToken> blacklistToken = blacklistTokenRepository.findByToken(token);
+            return blacklistToken.isPresent();
+        }
+        catch (DataAccessException exception){
+            throw new DatabaseAccessException("Error accessing the database");
+        }
     }
 
     public void addTokenToBlacklist(HttpServletRequest request, HttpServletResponse response){
@@ -30,6 +37,12 @@ public class BlacklistTokenService {
         // Clear the Authorization header in the response to log the user out.
         response.setHeader("Authorization", "");
         BlacklistToken blacklistToken = BlacklistToken.builder().token(token).build();
-        blacklistTokenRepository.save(blacklistToken);
+
+        try {
+            blacklistTokenRepository.save(blacklistToken);
+        }
+        catch (DataAccessException exception){
+            throw new DatabaseAccessException("Error accessing the database");
+        }
     }
 }

@@ -11,7 +11,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -23,9 +22,9 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/api/v1/authorization")
-@RequiredArgsConstructor
 @Tag(name = "Authorization", description = "Endpoints related to user authorization and permissions")
 public class AuthorizationController {
+
     @Autowired
     private UserMapper userMapper;
 
@@ -41,15 +40,14 @@ public class AuthorizationController {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         // Determine the user's role and return the appropriate list of permissions.
-        switch (user.getRole()) {
-            case ADMIN:
-                return List.of(PermissionName.CREATE_PROJECT, PermissionName.MANAGE_USERS, PermissionName.VIEW_USER_ACTIVITY, PermissionName.CREATE_OPENING, PermissionName.VIEW_PENDING_APPLICATIONS, PermissionName.VIEW_REPORTS, PermissionName.MANAGE_OPENINGS, PermissionName.REGISTER_USER, PermissionName.ADMIN_OWN_OPENINGS, PermissionName.ADMIN_OTHER_OPENINGS, PermissionName.MANAGE_INTERVIEWER_STATUS);
-            case RECRUITER:
-                return List.of(PermissionName.CREATE_OPENING, PermissionName.VIEW_PENDING_APPLICATIONS, PermissionName.MANAGE_OPENINGS, PermissionName.VIEW_REPORTS, PermissionName.REGISTER_USER, PermissionName.RECRUITER_OWN_OPENINGS, PermissionName.RECRUITER_OTHER_OPENINGS, PermissionName.MANAGE_INTERVIEWER_STATUS);
-            case EMPLOYEE:
-                return List.of(PermissionName.VIEW_ALL_OPENINGS, PermissionName.REGISTER_USER, PermissionName.VIEW_APPLIED_OPENINGS, PermissionName.INTERVIEWER);
-        }
-        return null;
+        return switch (user.getRole()) {
+            case ADMIN ->
+                    List.of(PermissionName.CREATE_PROJECT, PermissionName.MANAGE_USERS, PermissionName.VIEW_USER_ACTIVITY, PermissionName.CREATE_OPENING, PermissionName.VIEW_PENDING_APPLICATIONS, PermissionName.VIEW_REPORTS, PermissionName.MANAGE_OPENINGS, PermissionName.REGISTER_USER, PermissionName.ADMIN_OWN_OPENINGS, PermissionName.ADMIN_OTHER_OPENINGS, PermissionName.MANAGE_INTERVIEWER_STATUS);
+            case RECRUITER ->
+                    List.of(PermissionName.CREATE_OPENING, PermissionName.VIEW_PENDING_APPLICATIONS, PermissionName.MANAGE_OPENINGS, PermissionName.VIEW_REPORTS, PermissionName.REGISTER_USER, PermissionName.RECRUITER_OWN_OPENINGS, PermissionName.RECRUITER_OTHER_OPENINGS, PermissionName.MANAGE_INTERVIEWER_STATUS);
+            case EMPLOYEE ->
+                    List.of(PermissionName.VIEW_ALL_OPENINGS, PermissionName.REGISTER_USER, PermissionName.VIEW_APPLIED_OPENINGS, PermissionName.INTERVIEWER);
+        };
     }
 
     /**

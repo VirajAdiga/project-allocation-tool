@@ -4,7 +4,6 @@ import com.project.userservice.dto.Skill;
 import com.project.userservice.entities.User;
 import com.project.userservice.dto.PublicUser;
 import com.project.userservice.services.ProjectAllocationServiceClient;
-import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -16,8 +15,8 @@ import java.util.stream.Collectors;
  * Component class responsible for mapping between DBUser entities and PublicUser models.
  */
 @Component
-@AllArgsConstructor
 public class UserMapper {
+
     @Autowired
     private ProjectAllocationServiceClient projectAllocationServiceClient;
 

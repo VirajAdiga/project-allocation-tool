@@ -13,9 +13,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,11 +22,11 @@ import org.springframework.web.bind.annotation.*;
  */
 @RestController
 @RequestMapping("/api/v1/authentication")
-@RequiredArgsConstructor
 @Tag(name = "Authentication", description = "Endpoints related to user authentication and authorization")
 public class AuthenticationController {
 
-    private final AuthenticationService authenticationService;
+    @Autowired
+    private AuthenticationService authenticationService;
 
     @Autowired
     private AuthorizationService authorizationService;
@@ -96,12 +94,7 @@ public class AuthenticationController {
     @PostMapping("/logout")
     @Hidden
     public ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse response) {
-        try {
-            // Call the logout service method to perform the logout logic
-            blacklistTokenService.addTokenToBlacklist(request, response);
-            return ResponseEntity.ok("Logged out successfully.");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to logout.");
-        }
+        blacklistTokenService.addTokenToBlacklist(request, response);
+        return ResponseEntity.ok("Logged out successfully.");
     }
 }

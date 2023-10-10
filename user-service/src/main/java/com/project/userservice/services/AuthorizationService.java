@@ -11,6 +11,7 @@ import java.util.HashMap;
  */
 @Service
 public class AuthorizationService {
+
     @Autowired
     private JwtService jwtService;
 
