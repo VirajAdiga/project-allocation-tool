@@ -2,10 +2,7 @@ package com.project.userservice.services;
 
 import com.project.userservice.dto.RegisterRequest;
 import com.project.userservice.dto.AuthenticationRequest;
-import com.project.userservice.exception.CustomAuthenticationException;
-import com.project.userservice.exception.DatabaseAccessException;
-import com.project.userservice.exception.ResourceNotFoundException;
-import com.project.userservice.exception.UserRegistrationException;
+import com.project.userservice.exception.*;
 import com.project.userservice.entities.User;
 import com.project.userservice.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,6 +55,9 @@ public class AuthenticationService {
         catch (DataAccessException exception){
             throw new DatabaseAccessException("Error accessing the database");
         }
+        catch (Exception exception){
+            throw new ServerSideGeneralException("Something went wrong!");
+        }
     }
 
     /**
@@ -69,18 +69,23 @@ public class AuthenticationService {
      */
     public User authenticate(AuthenticationRequest request) {
         // Retrieve the user based on the provided email from the repository.
-        User user;
+        Optional<User> user;
         try {
-            user = userRepository.findByEmail(request.getEmail())
-                    .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + request.getEmail()));
+            user = userRepository.findByEmail(request.getEmail());
         }
         catch (DataAccessException exception){
             throw new DatabaseAccessException("Error accessing the database");
         }
-
+        catch (Exception exception){
+            throw new ServerSideGeneralException("Something went wrong!");
+        }
+        if (user.isEmpty()){
+            throw new CustomAuthenticationException("Invalid credentials");
+        }
+        User existingUser = user.get();
         // Compare the provided password with the encoded password in the user object.
-        if (passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            return user; // Return the user if authentication is successful.
+        if (passwordEncoder.matches(request.getPassword(), existingUser.getPassword())) {
+            return existingUser; // Return the user if authentication is successful.
         }
         // Throw an exception if authentication fails.
         throw new CustomAuthenticationException("Invalid credentials");

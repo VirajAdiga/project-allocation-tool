@@ -2,6 +2,7 @@ package com.project.userservice.services;
 
 import com.project.userservice.entities.BlacklistToken;
 import com.project.userservice.exception.DatabaseAccessException;
+import com.project.userservice.exception.ServerSideGeneralException;
 import com.project.userservice.repositories.BlacklistTokenRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -25,6 +26,9 @@ public class BlacklistTokenService {
         catch (DataAccessException exception){
             throw new DatabaseAccessException("Error accessing the database");
         }
+        catch (Exception exception){
+            throw new ServerSideGeneralException("Something went wrong!");
+        }
     }
 
     public void addTokenToBlacklist(HttpServletRequest request, HttpServletResponse response){
@@ -43,6 +47,9 @@ public class BlacklistTokenService {
         }
         catch (DataAccessException exception){
             throw new DatabaseAccessException("Error accessing the database");
+        }
+        catch (Exception exception){
+            throw new ServerSideGeneralException("Something went wrong!");
         }
     }
 }

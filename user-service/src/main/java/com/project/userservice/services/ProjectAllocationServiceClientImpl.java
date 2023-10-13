@@ -39,12 +39,12 @@ public class ProjectAllocationServiceClientImpl implements ProjectAllocationServ
 
             return (Skill) skillObject.getBody();
         }
+        catch (ResourceNotFoundException ex) {
+            throw new ServiceClientException("Resource not found with id: " + skillId);
+        }
         catch (HttpClientErrorException ex) {
             // Handle specific HTTP client errors (4xx)
             throw new ServiceClientException("Error communicating with the service:  " + ex.getStatusText());
-        } catch (ResourceNotFoundException ex) {
-            // Handle network-related issues
-            throw new ServiceClientException("Resource not found with id: " + skillId);
         } catch (Exception ex) {
             // Handle other exceptions
             throw new ServiceClientException("An error occurred: " + ex.getMessage());

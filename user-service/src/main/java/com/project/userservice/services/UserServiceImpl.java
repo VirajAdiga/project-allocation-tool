@@ -6,6 +6,7 @@ import com.project.userservice.entities.enums.Role;
 import com.project.userservice.exception.DatabaseAccessException;
 import com.project.userservice.exception.ResourceNotFoundException;
 import com.project.userservice.entities.*;
+import com.project.userservice.exception.ServerSideGeneralException;
 import com.project.userservice.exception.UnauthorizedAccessException;
 import com.project.userservice.repositories.UserRepository;
 import jakarta.transaction.Transactional;
@@ -32,68 +33,86 @@ public class UserServiceImpl implements UserService {
     // Retrieve a user by their email.
     @Override
     public User getUser(String email) {
+        Optional<User> userOptional;
         try {
-            Optional<User> userOptional = userRepository.findByEmail(email);
-            if (userOptional.isEmpty()) {
-                throw new ResourceNotFoundException("User not found with email: " + email);
-            }
-            return userOptional.get();
+            userOptional = userRepository.findByEmail(email);
         }
         catch (DataAccessException exception){
             throw new DatabaseAccessException("Error accessing the database");
         }
+        catch (Exception exception){
+            throw new ServerSideGeneralException("Something went wrong!");
+        }
+
+        if (userOptional.isEmpty()) {
+            throw new ResourceNotFoundException("User not found with email: " + email);
+        }
+        return userOptional.get();
     }
 
     // Delete a user by their userId.
     @Override
     public void deleteUser(Integer userId) {
+        Optional<User> optionalUser;
         try {
             // Retrieve the user by userId
-            Optional<User> optionalUser = userRepository.findById(Long.valueOf(userId));
-
-            // Check if the user exists
-            if (optionalUser.isPresent()) {
-                // Delete the user
-                userRepository.delete(optionalUser.get());
-            } else {
-                throw new ResourceNotFoundException("User not found with id: " + userId);
-            }
+            optionalUser = userRepository.findById(Long.valueOf(userId));
         }
         catch (DataAccessException exception){
             throw new DatabaseAccessException("Error accessing the database");
+        }
+        catch (Exception exception){
+            throw new ServerSideGeneralException("Something went wrong!");
+        }
+        // Check if the user exists
+        if (optionalUser.isPresent()) {
+            // Delete the user
+            userRepository.delete(optionalUser.get());
+        } else {
+            throw new ResourceNotFoundException("User not found with id: " + userId);
         }
     }
 
     // Update a user's information by userId.
     @Override
     public User updateUser(Integer userId, User updatedUser) {
+        Optional<User> optionalUser;
         try {
-            Optional<User> optionalUser = userRepository.findById(Long.valueOf(userId));
-
-            if (optionalUser.isPresent()) {
-                User existingUser = optionalUser.get();
-
-                // Apply partial updates only for the fields that are provided in updatedUser
-                if (updatedUser.getName() != null) {
-                    existingUser.setName(updatedUser.getName());
-                }
-                if (updatedUser.getEmail() != null) {
-                    existingUser.setEmail(updatedUser.getEmail());
-                }
-                if (updatedUser.getPassword() != null) {
-                    existingUser.setPassword(updatedUser.getPassword());
-                }
-                if (updatedUser.getRole() != null) {
-                    existingUser.setRole(updatedUser.getRole());
-                }
-                // Save the updated user
-                return userRepository.save(existingUser);
-            } else {
-                throw new ResourceNotFoundException("User not found with id: " + userId);
-            }
+            optionalUser = userRepository.findById(Long.valueOf(userId));
         }
         catch (DataAccessException exception){
             throw new DatabaseAccessException("Error accessing the database");
+        }
+        catch (Exception exception){
+            throw new ServerSideGeneralException("Something went wrong!");
+        }
+        if (optionalUser.isEmpty()){
+            throw new ResourceNotFoundException("User not found with id: " + userId);
+        }
+        User existingUser = optionalUser.get();
+
+        // Apply partial updates only for the fields that are provided in updatedUser
+        if (updatedUser.getName() != null) {
+            existingUser.setName(updatedUser.getName());
+        }
+        if (updatedUser.getEmail() != null) {
+            existingUser.setEmail(updatedUser.getEmail());
+        }
+        if (updatedUser.getPassword() != null) {
+            existingUser.setPassword(updatedUser.getPassword());
+        }
+        if (updatedUser.getRole() != null) {
+            existingUser.setRole(updatedUser.getRole());
+        }
+        // Save the updated user
+        try {
+            return userRepository.save(existingUser);
+        }
+        catch (DataAccessException exception){
+            throw new DatabaseAccessException("Error accessing the database");
+        }
+        catch (Exception exception){
+            throw new ServerSideGeneralException("Something went wrong!");
         }
     }
 
@@ -109,17 +128,28 @@ public class UserServiceImpl implements UserService {
         catch (DataAccessException exception){
             throw new DatabaseAccessException("Error accessing the database");
         }
+        catch (Exception exception){
+            throw new ServerSideGeneralException("Something went wrong!");
+        }
     }
 
     @Override
     public User getUserById(Long userId) {
+        Optional<User> user;
         try {
-            return userRepository.findById(userId)
-                    .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + userId));
+            user = userRepository.findById(userId);
         }
         catch (DataAccessException exception){
             throw new DatabaseAccessException("Error accessing the database");
         }
+        catch (Exception exception){
+            throw new ServerSideGeneralException("Something went wrong!");
+        }
+
+        if (user.isEmpty()){
+            throw new ResourceNotFoundException("User not found with id: " + userId);
+        }
+        return user.get();
     }
 
     @Override
@@ -129,6 +159,9 @@ public class UserServiceImpl implements UserService {
         }
         catch (DataAccessException exception){
             throw new DatabaseAccessException("Error accessing the database");
+        }
+        catch (Exception exception){
+            throw new ServerSideGeneralException("Something went wrong!");
         }
     }
 
@@ -140,71 +173,108 @@ public class UserServiceImpl implements UserService {
         catch (DataAccessException exception){
             throw new DatabaseAccessException("Error accessing the database");
         }
+        catch (Exception exception){
+            throw new ServerSideGeneralException("Something went wrong!");
+        }
     }
 
     @Override
     public void partialUpdateUser(Integer userId, UpdateUserRequest updateUserRequest) {
+        Optional<User> existingUser;
         try {
-            User existingUser = userRepository.findById(Long.valueOf(userId))
-                    .orElseThrow(() -> new ResourceNotFoundException("User not found with id " + userId));
-
-            if (updateUserRequest.getName() != null) {
-                existingUser.setName(updateUserRequest.getName());
-            }
-            if (updateUserRequest.getEmail() != null) {
-                existingUser.setEmail(updateUserRequest.getEmail());
-            }
-            if (updateUserRequest.getSkillIds() != null) {
-                existingUser.setSkillIds(updateUserRequest.getSkillIds());
-            }
-
-            userRepository.save(existingUser);
+            existingUser = userRepository.findById(Long.valueOf(userId));
         }
         catch (DataAccessException exception){
             throw new DatabaseAccessException("Error accessing the database");
         }
         catch (Exception exception){
-            throw new RuntimeException("Something went wrong, try again");
+            throw new RuntimeException("Something went wrong!");
+        }
+
+        if (existingUser.isEmpty()) {
+            throw new ResourceNotFoundException("User not found with id: " + userId);
+        }
+        User user = existingUser.get();
+        if (updateUserRequest.getName() != null) {
+            user.setName(updateUserRequest.getName());
+        }
+        if (updateUserRequest.getEmail() != null) {
+            user.setEmail(updateUserRequest.getEmail());
+        }
+        if (updateUserRequest.getSkillIds() != null) {
+            user.setSkillIds(updateUserRequest.getSkillIds());
+        }
+        try{
+            userRepository.save(user);
+        }
+        catch (DataAccessException exception){
+            throw new DatabaseAccessException("Error accessing the database");
+        }
+        catch (Exception exception){
+            throw new RuntimeException("Something went wrong!");
         }
     }
 
     @Override
     public void partialUpdateAdminUser(Integer userId, PublicUser publicUser) {
+        Optional<User> existingUser;
         try {
-            User existingUser = userRepository.findById(Long.valueOf(userId))
-                    .orElseThrow(() -> new ResourceNotFoundException("User not found with id " + userId));
-            if (publicUser.getName() != null) {
-                existingUser.setName(publicUser.getName());
-            }
-            if (publicUser.getEmail() != null) {
-                existingUser.setEmail(publicUser.getEmail());
-            }
-            if (publicUser.getRole() != null) {
-                existingUser.setRole(publicUser.getRole());
-            }
-            if (publicUser.isInterviewer() != existingUser.isInterviewer()) {
-                existingUser.setInterviewer(publicUser.isInterviewer());
-            }
-            userRepository.save(existingUser);
-        }
-        catch (DataAccessException exception){
+            existingUser = userRepository.findById(Long.valueOf(userId));
+        } catch (DataAccessException exception) {
             throw new DatabaseAccessException("Error accessing the database");
+        } catch (Exception exception) {
+            throw new RuntimeException("Something went wrong!");
         }
-        catch (Exception exception){
-            throw new RuntimeException("Something went wrong, try again");
+        if (existingUser.isEmpty()) {
+            throw new ResourceNotFoundException("User not found with id: " + userId);
+        }
+        User user = existingUser.get();
+        if (publicUser.getName() != null) {
+            user.setName(publicUser.getName());
+        }
+        if (publicUser.getEmail() != null) {
+            user.setEmail(publicUser.getEmail());
+        }
+        if (publicUser.getRole() != null) {
+            user.setRole(publicUser.getRole());
+        }
+        if (publicUser.isInterviewer() != user.isInterviewer()) {
+            user.setInterviewer(publicUser.isInterviewer());
+        }
+        try {
+            userRepository.save(user);
+        } catch (DataAccessException exception) {
+            throw new DatabaseAccessException("Error accessing the database");
+        } catch (Exception exception) {
+            throw new RuntimeException("Something went wrong!");
         }
     }
 
     @Override
     public void updateUserProjectAllocation(Long userId, Long userProjectId) {
+        Optional<User> existingUser;
         try {
-            User existingUser = userRepository.findById(userId)
-                    .orElseThrow(() -> new ResourceNotFoundException("User not found with id " + userId));
-            existingUser.setProjectAllocatedId(userProjectId);
-            userRepository.save(existingUser);
+            existingUser = userRepository.findById(userId);
         }
         catch (DataAccessException exception){
             throw new DatabaseAccessException("Error accessing the database");
+        }
+        catch (Exception exception){
+            throw new ServerSideGeneralException("Something went wrong!");
+        }
+        if (existingUser.isEmpty()) {
+            throw new ResourceNotFoundException("User not found with id: " + userId);
+        }
+        User user = existingUser.get();
+        user.setProjectAllocatedId(userProjectId);
+        try{
+            userRepository.save(user);
+        }
+        catch (DataAccessException exception){
+            throw new DatabaseAccessException("Error accessing the database");
+        }
+        catch (Exception exception){
+            throw new ServerSideGeneralException("Something went wrong!");
         }
     }
 
@@ -228,6 +298,9 @@ public class UserServiceImpl implements UserService {
         catch (DataAccessException exception){
             throw new DatabaseAccessException("Error accessing the database");
         }
+        catch (Exception exception){
+            throw new ServerSideGeneralException("Something went wrong!");
+        }
     }
 
     /**
@@ -249,6 +322,9 @@ public class UserServiceImpl implements UserService {
         }
         catch (DataAccessException exception){
             throw new DatabaseAccessException("Error accessing the database");
+        }
+        catch (Exception exception){
+            throw new ServerSideGeneralException("Something went wrong!");
         }
     }
 }
