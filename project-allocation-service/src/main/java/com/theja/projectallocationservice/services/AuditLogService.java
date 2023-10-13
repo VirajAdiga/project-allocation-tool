@@ -1,8 +1,12 @@
 package com.theja.projectallocationservice.services;
 
 import com.theja.projectallocationservice.entities.AuditLog;
+import com.theja.projectallocationservice.exceptions.DatabaseAccessException;
+import com.theja.projectallocationservice.exceptions.ResourceNotFoundException;
+import com.theja.projectallocationservice.exceptions.ServerSideGeneralException;
 import com.theja.projectallocationservice.repositories.AuditLogRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -29,7 +33,15 @@ public class AuditLogService {
         if (pageSize == null) pageSize = 1000;
         if (pageNumber == null) pageNumber = 0;
         PageRequest pageRequest = PageRequest.of(pageNumber, pageSize);
-        return auditLogRepository.findAll(pageRequest);
+        try {
+            return auditLogRepository.findAll(pageRequest);
+        }
+        catch (DataAccessException exception){
+            throw new DatabaseAccessException("Error accessing the database");
+        }
+        catch (Exception exception){
+            throw new ServerSideGeneralException("Something went wrong!");
+        }
     }
 
     /**
@@ -39,7 +51,15 @@ public class AuditLogService {
      * @return List of audit logs associated with the user.
      */
     public List<AuditLog> getAllAuditLogsForUser(Long userId) {
-        return auditLogRepository.findByUserId(userId);
+        try {
+            return auditLogRepository.findByUserId(userId);
+        }
+        catch (DataAccessException exception){
+            throw new DatabaseAccessException("Error accessing the database");
+        }
+        catch (Exception exception){
+            throw new ServerSideGeneralException("Something went wrong!");
+        }
     }
 
     /**
@@ -49,8 +69,20 @@ public class AuditLogService {
      * @return The audit log with the specified ID, or null if not found.
      */
     public AuditLog getAuditLogById(Long id) {
-        Optional<AuditLog> auditLog = auditLogRepository.findById(id);
-        return auditLog.orElse(null);
+        Optional<AuditLog> auditLog;
+        try {
+            auditLog = auditLogRepository.findById(id);
+        }
+        catch (DataAccessException exception){
+            throw new DatabaseAccessException("Error accessing the database");
+        }
+        catch (Exception exception){
+            throw new ServerSideGeneralException("Something went wrong!");
+        }
+        if (auditLog.isEmpty()) {
+            throw new ResourceNotFoundException("Audit log not found with id: " + id);
+        }
+        return auditLog.get();
     }
 
     /**
@@ -60,6 +92,14 @@ public class AuditLogService {
      * @return The created audit log.
      */
     public AuditLog createAuditLog(AuditLog auditLog) {
-        return auditLogRepository.save(auditLog);
+        try {
+            return auditLogRepository.save(auditLog);
+        }
+        catch (DataAccessException exception){
+            throw new DatabaseAccessException("Error accessing the database");
+        }
+        catch (Exception exception){
+            throw new ServerSideGeneralException("Something went wrong!");
+        }
     }
 }

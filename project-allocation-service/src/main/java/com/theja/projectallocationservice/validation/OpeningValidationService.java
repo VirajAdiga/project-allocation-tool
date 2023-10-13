@@ -3,7 +3,6 @@ package com.theja.projectallocationservice.validation;
 import com.theja.projectallocationservice.dto.RequestContext;
 import com.theja.projectallocationservice.entities.enums.OpeningStatus;
 import com.theja.projectallocationservice.entities.enums.PermissionName;
-import com.theja.projectallocationservice.exceptions.SkillNotFoundException;
 import com.theja.projectallocationservice.exceptions.UnauthorizedAccessException;
 import com.theja.projectallocationservice.entities.*;
 import com.theja.projectallocationservice.services.AuditCommentService;
@@ -84,8 +83,7 @@ public class OpeningValidationService {
     private void assignSkillsToOpening(Opening opening, AuditLog auditLog) {
         List<Skill> skills = new ArrayList<>();
         for (Skill skill : opening.getSkills()) {
-            skills.add(skillService.getSkillById(skill.getId())
-                    .orElseThrow(() -> new SkillNotFoundException("Skill not found with ID: " + skill.getId())));
+            skills.add(skillService.getSkillById(skill.getId()));
         }
         opening.setSkills(skills);
         auditCommentService.createAuditComment(AuditComment.builder()

@@ -4,7 +4,6 @@ import com.theja.projectallocationservice.dto.CreateProjectDTO;
 import com.theja.projectallocationservice.dto.ProjectListResponse;
 import com.theja.projectallocationservice.dto.RequestContext;
 import com.theja.projectallocationservice.entities.enums.PermissionName;
-import com.theja.projectallocationservice.exceptions.ResourceNotFoundException;
 import com.theja.projectallocationservice.exceptions.UnauthorizedAccessException;
 import com.theja.projectallocationservice.mappers.ProjectMapper;
 import com.theja.projectallocationservice.entities.*;
@@ -112,11 +111,7 @@ public class ProjectController {
     public ResponseEntity<com.theja.projectallocationservice.dto.Project> getProjectById(@PathVariable("id") Long id) {
         // Fetch a project by its ID and return it as a model
         Project project = projectService.getProjectById(id);
-        if (project != null) {
-            return ResponseEntity.ok(projectMapper.entityToModel(project));
-        } else {
-            throw new ResourceNotFoundException("Project not found with ID: " + id);
-        }
+        return ResponseEntity.ok(projectMapper.entityToModel(project));
     }
 
     /**
@@ -176,11 +171,7 @@ public class ProjectController {
     public ResponseEntity<com.theja.projectallocationservice.dto.Project> updateProject(@PathVariable("id") Long id, @RequestBody Project project) {
         // Update an existing project by ID, save the changes, and return the response
         Project dbUpdatedProject = projectService.updateProject(id, project);
-        if (dbUpdatedProject != null) {
-            return ResponseEntity.ok(projectMapper.entityToModel(dbUpdatedProject));
-        } else {
-            throw new ResourceNotFoundException("Project not found with ID: " + id);
-        }
+        return ResponseEntity.ok(projectMapper.entityToModel(dbUpdatedProject));
     }
 
     /**
@@ -195,12 +186,7 @@ public class ProjectController {
     @ApiResponse(responseCode = "204", description = "Project deleted successfully")
     public ResponseEntity<Void> deleteProject(@PathVariable("id") Long id) {
         // Delete a project by ID and return the appropriate response
-        boolean deleted = projectService.deleteProject(id);
-        if (deleted) {
-            return ResponseEntity.noContent().build();
-        } else {
-            throw new ResourceNotFoundException("Project not found with ID: " + id);
-        }
+        projectService.deleteProject(id);
+        return ResponseEntity.noContent().build();
     }
 }
-

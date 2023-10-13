@@ -1,12 +1,16 @@
 package com.theja.projectallocationservice.services;
 
+import com.theja.projectallocationservice.exceptions.DatabaseAccessException;
 import com.theja.projectallocationservice.exceptions.ResourceNotFoundException;
 import com.theja.projectallocationservice.entities.AuditComment;
+import com.theja.projectallocationservice.exceptions.ServerSideGeneralException;
 import com.theja.projectallocationservice.repositories.AuditCommentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Service class for managing audit comment-related operations.
@@ -22,7 +26,15 @@ public class AuditCommentService {
      * @return List of all audit comments.
      */
     public List<AuditComment> getAllAuditComments() {
-        return auditCommentRepository.findAll();
+        try {
+            return auditCommentRepository.findAll();
+        }
+        catch (DataAccessException exception){
+            throw new DatabaseAccessException("Error accessing the database");
+        }
+        catch (Exception exception){
+            throw new ServerSideGeneralException("Something went wrong!");
+        }
     }
 
     /**
@@ -33,8 +45,20 @@ public class AuditCommentService {
      * @throws ResourceNotFoundException If the audit comment with the given ID is not found.
      */
     public AuditComment getAuditCommentById(Long id) {
-        return auditCommentRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Audit comment not found"));
+        Optional<AuditComment> auditComment;
+        try {
+            auditComment = auditCommentRepository.findById(id);
+        }
+        catch (DataAccessException exception){
+            throw new DatabaseAccessException("Error accessing the database");
+        }
+        catch (Exception exception){
+            throw new ServerSideGeneralException("Something went wrong!");
+        }
+        if (auditComment.isEmpty()){
+            throw new ResourceNotFoundException("Audit comment not found " + id);
+        }
+        return auditComment.get();
     }
 
     /**
@@ -44,7 +68,15 @@ public class AuditCommentService {
      * @return List of audit comments associated with the specified audit log.
      */
     public List<AuditComment> getAuditCommentsByAuditLogId(Long auditLogId) {
-        return auditCommentRepository.findByAuditLogId(auditLogId);
+        try {
+            return auditCommentRepository.findByAuditLogId(auditLogId);
+        }
+        catch (DataAccessException exception){
+            throw new DatabaseAccessException("Error accessing the database");
+        }
+        catch (Exception exception){
+            throw new ServerSideGeneralException("Something went wrong!");
+        }
     }
 
     /**
@@ -54,6 +86,14 @@ public class AuditCommentService {
      * @return The created audit comment.
      */
     public AuditComment createAuditComment(AuditComment auditComment) {
-        return auditCommentRepository.save(auditComment);
+        try {
+            return auditCommentRepository.save(auditComment);
+        }
+        catch (DataAccessException exception){
+            throw new DatabaseAccessException("Error accessing the database");
+        }
+        catch (Exception exception){
+            throw new ServerSideGeneralException("Something went wrong!");
+        }
     }
 }

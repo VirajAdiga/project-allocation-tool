@@ -1,10 +1,13 @@
 package com.theja.projectallocationservice.services;
 
+import com.theja.projectallocationservice.exceptions.DatabaseAccessException;
 import com.theja.projectallocationservice.exceptions.InterviewNotFoundException;
 import com.theja.projectallocationservice.exceptions.ResourceNotFoundException;
 import com.theja.projectallocationservice.entities.Interview;
+import com.theja.projectallocationservice.exceptions.ServerSideGeneralException;
 import com.theja.projectallocationservice.repositories.InterviewRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -26,8 +29,20 @@ public class InterviewService {
      * @throws ResourceNotFoundException If the interview is not found.
      */
     public Interview getInterviewById(Long id) {
-        return interviewRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Interview not found"));
+        Optional<Interview> interview;
+        try {
+            interview = interviewRepository.findById(id);
+        }
+        catch (DataAccessException exception){
+            throw new DatabaseAccessException("Error accessing the database");
+        }
+        catch (Exception exception){
+            throw new ServerSideGeneralException("Something went wrong!");
+        }
+        if (interview.isEmpty()){
+            throw new ResourceNotFoundException("Interview not found with id " + id);
+        }
+        return interview.get();
     }
 
     /**
@@ -37,12 +52,28 @@ public class InterviewService {
      * @return A list of DBInterview entities associated with the provided interviewer ID.
      */
     public List<Interview> getInterviewsByInterviewerId(Long interviewerId) {
-        return interviewRepository.findByInterviewerId(interviewerId);
+        try {
+            return interviewRepository.findByInterviewerId(interviewerId);
+        }
+        catch (DataAccessException exception){
+            throw new DatabaseAccessException("Error accessing the database");
+        }
+        catch (Exception exception){
+            throw new ServerSideGeneralException("Something went wrong!");
+        }
     }
 
     public Interview updateInterviewFeedback(Long interviewId, String feedback) {
-        Optional<Interview> optionalInterview = interviewRepository.findById(interviewId);
-
+        Optional<Interview> optionalInterview;
+        try {
+            optionalInterview = interviewRepository.findById(interviewId);
+        }
+        catch (DataAccessException exception){
+            throw new DatabaseAccessException("Error accessing the database");
+        }
+        catch (Exception exception){
+            throw new ServerSideGeneralException("Something went wrong!");
+        }
         if (optionalInterview.isPresent()) {
             Interview interview = optionalInterview.get();
             interview.setFeedback(feedback);
@@ -60,13 +91,15 @@ public class InterviewService {
      * @throws InterviewNotFoundException If no interviews are found for the given application ID
      */
     public List<Interview> getInterviewsByApplicationId(Long applicationId) {
-        List<Interview> interviews = interviewRepository.findByApplicationId(applicationId);
-
-        if (interviews.isEmpty()) {
-            throw new InterviewNotFoundException("No interviews found for application ID: " + applicationId);
+        try {
+            return interviewRepository.findByApplicationId(applicationId);
         }
-
-        return interviews;
+        catch (DataAccessException exception){
+            throw new DatabaseAccessException("Error accessing the database");
+        }
+        catch (Exception exception){
+            throw new ServerSideGeneralException("Something went wrong!");
+        }
     }
 
     /**
@@ -76,7 +109,15 @@ public class InterviewService {
      * @return The created interview.
      */
     public Interview createInterview(Interview interview) {
-        return interviewRepository.save(interview);
+        try{
+            return interviewRepository.save(interview);
+        }
+        catch (DataAccessException exception){
+            throw new DatabaseAccessException("Error accessing the database");
+        }
+        catch (Exception exception){
+            throw new ServerSideGeneralException("Something went wrong!");
+        }
     }
 
     /**
@@ -88,12 +129,20 @@ public class InterviewService {
      * @throws ResourceNotFoundException If the interview is not found.
      */
     public Interview updateInterview(Long id, Interview interview) {
-        Interview existingInterview = getInterviewById(id);
-        // Update the properties of existingInterview with the properties from the provided interview
-        existingInterview.setStatus(interview.getStatus());
-        existingInterview.setScheduledTime(interview.getScheduledTime());
-        existingInterview.setApplication(interview.getApplication());
-        return interviewRepository.save(existingInterview);
+        try {
+            Interview existingInterview = getInterviewById(id);
+            // Update the properties of existingInterview with the properties from the provided interview
+            existingInterview.setStatus(interview.getStatus());
+            existingInterview.setScheduledTime(interview.getScheduledTime());
+            existingInterview.setApplication(interview.getApplication());
+            return interviewRepository.save(existingInterview);
+        }
+        catch (DataAccessException exception){
+            throw new DatabaseAccessException("Error accessing the database");
+        }
+        catch (Exception exception){
+            throw new ServerSideGeneralException("Something went wrong!");
+        }
     }
 
     /**
@@ -103,11 +152,17 @@ public class InterviewService {
      * @throws ResourceNotFoundException If the interview is not found.
      */
     public void deleteInterview(Long id) {
-        if (interviewRepository.existsById(id)) {
+        if (!interviewRepository.existsById(id)){
+            throw new ResourceNotFoundException("Interview not found with id " + id);
+        }
+        try {
             interviewRepository.deleteById(id);
-        } else {
-            throw new ResourceNotFoundException("Interview not found");
+        }
+        catch (DataAccessException exception){
+            throw new DatabaseAccessException("Error accessing the database");
+        }
+        catch (Exception exception){
+            throw new ServerSideGeneralException("Something went wrong!");
         }
     }
 }
-

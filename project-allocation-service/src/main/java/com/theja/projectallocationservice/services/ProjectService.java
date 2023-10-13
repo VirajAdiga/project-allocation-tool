@@ -2,8 +2,12 @@ package com.theja.projectallocationservice.services;
 
 import com.theja.projectallocationservice.dto.CreateProjectDTO;
 import com.theja.projectallocationservice.entities.Project;
+import com.theja.projectallocationservice.exceptions.DatabaseAccessException;
+import com.theja.projectallocationservice.exceptions.ResourceNotFoundException;
+import com.theja.projectallocationservice.exceptions.ServerSideGeneralException;
 import com.theja.projectallocationservice.repositories.ProjectRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -33,7 +37,15 @@ public class ProjectService {
         if (pageSize == null) pageSize = 1000;
         if (pageNumber == null) pageNumber = 0;
         PageRequest pageRequest = PageRequest.of(pageNumber, pageSize);
-        return projectRepository.findAll(pageRequest);
+        try {
+            return projectRepository.findAll(pageRequest);
+        }
+        catch (DataAccessException exception){
+            throw new DatabaseAccessException("Error accessing the database");
+        }
+        catch (Exception exception){
+            throw new ServerSideGeneralException("Something went wrong!");
+        }
     }
 
     /**
@@ -43,8 +55,20 @@ public class ProjectService {
      * @return The retrieved project, or null if not found.
      */
     public Project getProjectById(Long id) {
-        Optional<Project> project = projectRepository.findById(id);
-        return project.orElse(null);
+        Optional<Project> project;
+        try {
+            project = projectRepository.findById(id);
+        }
+        catch (DataAccessException exception){
+            throw new DatabaseAccessException("Error accessing the database");
+        }
+        catch (Exception exception){
+            throw new ServerSideGeneralException("Something went wrong!");
+        }
+        if (project.isEmpty()){
+            throw new ResourceNotFoundException("Project not found with id " + id);
+        }
+        return project.get();
     }
 
     /**
@@ -55,7 +79,15 @@ public class ProjectService {
      */
     public List<Project> getProjectsForUser(Long userId) {
         // Implement the logic to fetch projects associated with the user
-        return projectRepository.getProjectsForUser(userId);
+        try {
+            return projectRepository.getProjectsForUser(userId);
+        }
+        catch (DataAccessException exception){
+            throw new DatabaseAccessException("Error accessing the database");
+        }
+        catch (Exception exception){
+            throw new ServerSideGeneralException("Something went wrong!");
+        }
     }
 
     /**
@@ -68,7 +100,15 @@ public class ProjectService {
         Project project = new Project();
         project.setTitle(projectDTO.getTitle());
         project.setDetails(projectDTO.getDetails());
-        return projectRepository.save(project);
+        try {
+            return projectRepository.save(project);
+        }
+        catch (DataAccessException exception){
+            throw new DatabaseAccessException("Error accessing the database");
+        }
+        catch (Exception exception){
+            throw new ServerSideGeneralException("Something went wrong!");
+        }
     }
 
     /**
@@ -79,24 +119,39 @@ public class ProjectService {
      * @return The updated project, or null if the project with the given ID is not found.
      */
     public Project updateProject(Long id, Project updatedProjectData) {
-        Optional<Project> existingProjectOpt = projectRepository.findById(id);
-        if (existingProjectOpt.isPresent()) {
-            Project existingProject = existingProjectOpt.get();
-            // Update the basic properties of the project
-            existingProject.setTitle(updatedProjectData.getTitle());
-            existingProject.setDetails(updatedProjectData.getDetails());
+        Optional<Project> existingProjectOpt;
+        try {
+            existingProjectOpt = projectRepository.findById(id);
+        }
+        catch (DataAccessException exception){
+            throw new DatabaseAccessException("Error accessing the database");
+        }
+        catch (Exception exception){
+            throw new ServerSideGeneralException("Something went wrong!");
+        }
+        if (existingProjectOpt.isEmpty()) {
+            throw new ResourceNotFoundException("Project not found with id " + id);
+        }
+        Project existingProject = existingProjectOpt.get();
+        // Update the basic properties of the project
+        existingProject.setTitle(updatedProjectData.getTitle());
+        existingProject.setDetails(updatedProjectData.getDetails());
 
-            // Check if the updatedProjectData has openings and update the existing openings
-            if (updatedProjectData.getOpenings() != null) {
-                // Clear the existing openings and add the new ones
-                existingProject.getOpenings().clear();
-                existingProject.getOpenings().addAll(updatedProjectData.getOpenings());
-            }
-
+        // Check if the updatedProjectData has openings and update the existing openings
+        if (updatedProjectData.getOpenings() != null) {
+            // Clear the existing openings and add the new ones
+            existingProject.getOpenings().clear();
+            existingProject.getOpenings().addAll(updatedProjectData.getOpenings());
+        }
+        try {
             // Save the updated project
             return projectRepository.save(existingProject);
-        } else {
-            return null;
+        }
+        catch (DataAccessException exception){
+            throw new DatabaseAccessException("Error accessing the database");
+        }
+        catch (Exception exception){
+            throw new ServerSideGeneralException("Something went wrong!");
         }
     }
 
@@ -107,16 +162,24 @@ public class ProjectService {
      * @return True if the project was deleted, false if the project with the given ID was not found.
      */
     public boolean deleteProject(Long id) {
+        Optional<Project> project;
         // Find the project using the provided project ID
-        Optional<Project> project = projectRepository.findById(id);
-
+        try {
+            project = projectRepository.findById(id);
+        }
+        catch (DataAccessException exception){
+            throw new DatabaseAccessException("Error accessing the database");
+        }
+        catch (Exception exception){
+            throw new ServerSideGeneralException("Something went wrong!");
+        }
         // Check if the project with the given ID exists
         if (project.isPresent()) {
             // Delete the project from the repository
             projectRepository.deleteById(id);
             return true; // Indicate that the project was deleted
         } else {
-            return false; // Indicate that the project with the given ID was not found
+            throw new ResourceNotFoundException("Project not found with id " + id); // Indicate that the project with the given ID was not found
         }
     }
 
@@ -136,8 +199,16 @@ public class ProjectService {
         // Add the candidate user to the allocatedUsers set
         project.getAllocatedUsersId().add(candidateId);
 
-        // Save the updated project with the allocated user to the repository
-        projectRepository.save(project);
+        try {
+            // Save the updated project with the allocated user to the repository
+            projectRepository.save(project);
+        }
+        catch (DataAccessException exception){
+            throw new DatabaseAccessException("Error accessing the database");
+        }
+        catch (Exception exception){
+            throw new ServerSideGeneralException("Something went wrong!");
+        }
     }
 
 
@@ -147,9 +218,15 @@ public class ProjectService {
      * @return A list containing all projects from the repository.
      */
     public List<Project> getAllProjectsWithoutPagination() {
-        // Retrieve and return a list of all projects from the repository
-        return projectRepository.findAll();
+        try {
+            // Retrieve and return a list of all projects from the repository
+            return projectRepository.findAll();
+        }
+        catch (DataAccessException exception){
+            throw new DatabaseAccessException("Error accessing the database");
+        }
+        catch (Exception exception){
+            throw new ServerSideGeneralException("Something went wrong!");
+        }
     }
-
 }
-

@@ -2,8 +2,10 @@ package com.theja.projectallocationservice.services;
 
 import com.theja.projectallocationservice.entities.Opening;
 import com.theja.projectallocationservice.dto.RequestContext;
+import com.theja.projectallocationservice.exceptions.*;
 import com.theja.projectallocationservice.repositories.OpeningRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -34,7 +36,15 @@ public class OpeningService {
         if (pageSize == null) pageSize = 1000;
         if (pageNumber == null) pageNumber = 0;
         PageRequest pageRequest = PageRequest.of(pageNumber, pageSize);
-        return openingRepository.fetchOpenings(appliedBySelf, postedBySelf, pageRequest, requestContext.getLoggedinUser().getId());
+        try {
+            return openingRepository.fetchOpenings(appliedBySelf, postedBySelf, pageRequest, requestContext.getLoggedinUser().getId());
+        }
+        catch (DataAccessException exception){
+            throw new DatabaseAccessException("Error accessing the database");
+        }
+        catch (Exception exception){
+            throw new ServerSideGeneralException("Something went wrong!");
+        }
     }
 
     /**
@@ -44,7 +54,15 @@ public class OpeningService {
      * @return A list of openings for the project.
      */
     public List<Opening> getAllOpeningsForProject(Long projectId) {
-        return openingRepository.findByProjectId(projectId);
+        try {
+            return openingRepository.findByProjectId(projectId);
+        }
+        catch (DataAccessException exception){
+            throw new DatabaseAccessException("Error accessing the database");
+        }
+        catch (Exception exception){
+            throw new ServerSideGeneralException("Something went wrong!");
+        }
     }
 
     /**
@@ -54,8 +72,20 @@ public class OpeningService {
      * @return The opening with the specified ID, or null if not found.
      */
     public Opening getOpeningById(Long id) {
-        Optional<Opening> opening = openingRepository.findById(id);
-        return opening.orElse(null);
+        Optional<Opening> opening;
+        try {
+            opening = openingRepository.findById(id);
+        }
+        catch (DataAccessException exception){
+            throw new DatabaseAccessException("Error accessing the database");
+        }
+        catch (Exception exception){
+            throw new ServerSideGeneralException("Something went wrong!");
+        }
+        if (opening.isEmpty()){
+            throw new ResourceNotFoundException("Opening not found with id " + id);
+        }
+        return opening.get();
     }
 
     /**
@@ -65,7 +95,15 @@ public class OpeningService {
      * @return The created opening.
      */
     public Opening createOpening(Opening opening) {
-        return openingRepository.save(opening);
+        try {
+            return openingRepository.save(opening);
+        }
+        catch (DataAccessException exception){
+            throw new DatabaseAccessException("Error accessing the database");
+        }
+        catch (Exception exception){
+            throw new ServerSideGeneralException("Something went wrong!");
+        }
     }
 
     /**
@@ -76,13 +114,26 @@ public class OpeningService {
      * @return {@code true} if a duplicate opening exists, {@code false} otherwise.
      */
     public boolean isDuplicateOpening(Opening opening, Long projectId) {
-        return openingRepository.existsByAttributesAndProjectId(
-                opening.getTitle(),
-                opening.getDetails(),
-                opening.getLevel(),
-                opening.getLocation(),
-                projectId
-        );
+        boolean openingExists;
+        try {
+            openingExists = openingRepository.existsByAttributesAndProjectId(
+                    opening.getTitle(),
+                    opening.getDetails(),
+                    opening.getLevel(),
+                    opening.getLocation(),
+                    projectId
+            );
+        }
+        catch (DataAccessException exception){
+            throw new DatabaseAccessException("Error accessing the database");
+        }
+        catch (Exception exception){
+            throw new ServerSideGeneralException("Something went wrong!");
+        }
+        if (openingExists){
+            throw new OpeningAlreadyExistsException("Opening already exists with project id " + projectId);
+        }
+        return false;
     }
 
     /**
@@ -93,12 +144,21 @@ public class OpeningService {
      * @return The updated opening, or null if the opening is not found.
      */
     public Opening updateOpening(Long id, Opening opening) {
-        Optional<Opening> existingOpening = openingRepository.findById(id);
+        Optional<Opening> existingOpening;
+        try {
+            existingOpening = openingRepository.findById(id);
+        }
+        catch (DataAccessException exception){
+            throw new DatabaseAccessException("Error accessing the database");
+        }
+        catch (Exception exception){
+            throw new ServerSideGeneralException("Something went wrong!");
+        }
         if (existingOpening.isPresent()) {
             opening.setId(id);
             return openingRepository.save(opening);
         } else {
-            return null;
+            throw new OpeningNotFoundException(id);
         }
     }
 
@@ -109,13 +169,21 @@ public class OpeningService {
      * @return True if the opening is deleted, false if the opening is not found.
      */
     public boolean deleteOpening(Long id) {
-        Optional<Opening> opening = openingRepository.findById(id);
+        Optional<Opening> opening;
+        try {
+            opening = openingRepository.findById(id);
+        }
+        catch (DataAccessException exception){
+            throw new DatabaseAccessException("Error accessing the database");
+        }
+        catch (Exception exception){
+            throw new ServerSideGeneralException("Something went wrong!");
+        }
         if (opening.isPresent()) {
             openingRepository.deleteById(id);
             return true;
         } else {
-            return false;
+            throw new OpeningNotFoundException(id);
         }
     }
 }
-

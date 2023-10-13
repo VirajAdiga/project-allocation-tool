@@ -1,13 +1,18 @@
 package com.theja.projectallocationservice.services;
 
 import com.theja.projectallocationservice.entities.enums.ApplicationStatus;
+import com.theja.projectallocationservice.exceptions.DatabaseAccessException;
 import com.theja.projectallocationservice.exceptions.ResourceNotFoundException;
 import com.theja.projectallocationservice.entities.*;
+import com.theja.projectallocationservice.exceptions.ServerSideGeneralException;
 import com.theja.projectallocationservice.repositories.ApplicationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 /**
  * Service class for managing application-related operations.
@@ -25,10 +30,18 @@ public class ApplicationService {
      * @return A page of applications with the specified status.
      */
     public Page<Application> getAllApplicationsByStatus(ApplicationStatus status, Pageable pageable) {
-        if (status == null) {
-            return applicationRepository.findAll(pageable);
-        } else {
-            return applicationRepository.findByStatus(status, pageable);
+        try {
+            if (status == null) {
+                return applicationRepository.findAll(pageable);
+            } else {
+                return applicationRepository.findByStatus(status, pageable);
+            }
+        }
+        catch (DataAccessException exception){
+            throw new DatabaseAccessException("Error accessing the database");
+        }
+        catch (Exception exception){
+            throw new ServerSideGeneralException("Something went wrong!");
         }
     }
 
@@ -40,8 +53,20 @@ public class ApplicationService {
      * @throws ResourceNotFoundException If the application with the given ID is not found.
      */
     public Application getApplicationById(Long id) {
-        return applicationRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Application not found"));
+        Optional<Application> application;
+        try {
+            application = applicationRepository.findById(id);
+        }
+        catch (DataAccessException exception){
+            throw new DatabaseAccessException("Error accessing the database");
+        }
+        catch (Exception exception){
+            throw new ServerSideGeneralException("Something went wrong!");
+        }
+        if (application.isEmpty()){
+            throw new ResourceNotFoundException("Application not found with id " + id);
+        }
+        return application.get();
     }
 
     /**
@@ -51,7 +76,15 @@ public class ApplicationService {
      * @return The created application.
      */
     public Application createApplication(Application application) {
-        return applicationRepository.save(application);
+        try {
+            return applicationRepository.save(application);
+        }
+        catch (DataAccessException exception){
+            throw new DatabaseAccessException("Error accessing the database");
+        }
+        catch (Exception exception){
+            throw new ServerSideGeneralException("Something went wrong!");
+        }
     }
 
     /**
@@ -68,7 +101,15 @@ public class ApplicationService {
         existingApplication.setStatus(application.getStatus());
         existingApplication.setAppliedAt(application.getAppliedAt());
         existingApplication.setOpening(application.getOpening());
-        return applicationRepository.save(existingApplication);
+        try {
+            return applicationRepository.save(existingApplication);
+        }
+        catch (DataAccessException exception){
+            throw new DatabaseAccessException("Error accessing the database");
+        }
+        catch (Exception exception){
+            throw new ServerSideGeneralException("Something went wrong!");
+        }
     }
 
     /**
@@ -78,10 +119,17 @@ public class ApplicationService {
      * @throws ResourceNotFoundException If the application with the given ID is not found.
      */
     public void deleteApplication(Long id) {
-        if (applicationRepository.existsById(id)) {
+        if (!applicationRepository.existsById(id)){
+            throw new ResourceNotFoundException("Application not found with id " + id);
+        }
+        try {
             applicationRepository.deleteById(id);
-        } else {
-            throw new ResourceNotFoundException("Application not found");
+        }
+        catch (DataAccessException exception){
+            throw new DatabaseAccessException("Error accessing the database");
+        }
+        catch (Exception exception){
+            throw new ServerSideGeneralException("Something went wrong!");
         }
     }
 
@@ -93,7 +141,19 @@ public class ApplicationService {
      * @return The application associated with the specified opening and candidate.
      */
     public Application getApplicationByOpeningIdAndCandidateId(Long openingId, Long candidateId) {
-        return applicationRepository.findByOpeningIdAndCandidateId(openingId, candidateId);
+        Application application;
+        try {
+            application = applicationRepository.findByOpeningIdAndCandidateId(openingId, candidateId);
+        }
+        catch (DataAccessException exception){
+            throw new DatabaseAccessException("Error accessing the database");
+        }
+        catch (Exception exception){
+            throw new ServerSideGeneralException("Something went wrong!");
+        }
+        if (application == null){
+            throw new ResourceNotFoundException("Resource does not exist with opening id " + openingId + " and candidate id " + candidateId);
+        }
+        return application;
     }
 }
-

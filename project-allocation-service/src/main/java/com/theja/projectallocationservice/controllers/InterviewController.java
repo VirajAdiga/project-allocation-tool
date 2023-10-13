@@ -140,21 +140,17 @@ public class InterviewController {
                 .auditLog(auditLog)
                 .build());
         // Schedule the interview and update its status
-        if (application != null) {
-            interview.setApplication(application);
-            interview.setStatus(InterviewStatus.SCHEDULED);
-            interview.setFeedback("");
-            // Save the created interview and log the action
-            Interview dbCreatedInterview = interviewService.createInterview(interview);
-            auditCommentService.createAuditComment(AuditComment.builder()
-                    .comment("Interview created successfully")
-                    .auditLog(auditLog)
-                    .build());
-            // Return the response with a CREATED status
-            return ResponseEntity.status(HttpStatus.CREATED).body(interviewMapper.entityToModel(dbCreatedInterview));
-        } else {
-            throw new ResourceNotFoundException("Application not found with ID: " + applicationId);
-        }
+        interview.setApplication(application);
+        interview.setStatus(InterviewStatus.SCHEDULED);
+        interview.setFeedback("");
+        // Save the created interview and log the action
+        Interview dbCreatedInterview = interviewService.createInterview(interview);
+        auditCommentService.createAuditComment(AuditComment.builder()
+                .comment("Interview created successfully")
+                .auditLog(auditLog)
+                .build());
+        // Return the response with a CREATED status
+        return ResponseEntity.status(HttpStatus.CREATED).body(interviewMapper.entityToModel(dbCreatedInterview));
     }
 
     /**
@@ -182,19 +178,14 @@ public class InterviewController {
     public ResponseEntity<String> updateInterviewFeedback(@PathVariable Long interviewId, @RequestBody UpdateFeedbackRequest request) {
         // Fetch the interview by ID
         Interview interview = interviewService.getInterviewById(interviewId);
+        // Update the feedback
+        interview.setFeedback(request.getFeedback());
 
-        if (interview != null) {
-            // Update the feedback
-            interview.setFeedback(request.getFeedback());
+        // Save the updated interview
+        interviewService.updateInterview(interviewId, interview);
 
-            // Save the updated interview
-            interviewService.updateInterview(interviewId, interview);
-
-            // Return a success response
-            return ResponseEntity.ok("Feedback updated successfully");
-        } else {
-            throw new ResourceNotFoundException("Interview not found with ID: " + interviewId);
-        }
+        // Return a success response
+        return ResponseEntity.ok("Feedback updated successfully");
     }
 
     /**
@@ -230,25 +221,22 @@ public class InterviewController {
                 .comment("Interview with id " + interviewId + " found")
                 .auditLog(auditLog)
                 .build());
-        if (interview != null) {
-            if (newStatus == InterviewStatus.SCHEDULED) {
-                return ResponseEntity.badRequest().build();
-            } else if (newStatus == InterviewStatus.COMPLETED && interview.getStatus() != InterviewStatus.SCHEDULED) {
-                return ResponseEntity.badRequest().build();
-            } else if (newStatus == InterviewStatus.CANCELLED && interview.getStatus() != InterviewStatus.SCHEDULED) {
-                return ResponseEntity.badRequest().build();
-            }
-            // Update the interview status based on newStatus
-            interview.setStatus(newStatus);
-            // Save the updated interview and log the action
-            Interview dbUpdatedInterview = interviewService.updateInterview(interviewId, interview);
-            auditCommentService.createAuditComment(AuditComment.builder()
-                    .comment("Interview status updated successfully")
-                    .auditLog(auditLog)
-                    .build());
-            // Return the response with the updated interview
-            return ResponseEntity.ok(interviewMapper.entityToModel(dbUpdatedInterview));
+        if (newStatus == InterviewStatus.SCHEDULED) {
+            return ResponseEntity.badRequest().build();
+        } else if (newStatus == InterviewStatus.COMPLETED && interview.getStatus() != InterviewStatus.SCHEDULED) {
+            return ResponseEntity.badRequest().build();
+        } else if (newStatus == InterviewStatus.CANCELLED && interview.getStatus() != InterviewStatus.SCHEDULED) {
+            return ResponseEntity.badRequest().build();
         }
-        throw new ResourceNotFoundException("Interview not found with ID: " + interviewId);
+        // Update the interview status based on newStatus
+        interview.setStatus(newStatus);
+        // Save the updated interview and log the action
+        Interview dbUpdatedInterview = interviewService.updateInterview(interviewId, interview);
+        auditCommentService.createAuditComment(AuditComment.builder()
+                .comment("Interview status updated successfully")
+                .auditLog(auditLog)
+                .build());
+        // Return the response with the updated interview
+        return ResponseEntity.ok(interviewMapper.entityToModel(dbUpdatedInterview));
     }
 }

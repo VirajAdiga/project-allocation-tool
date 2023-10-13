@@ -62,5 +62,19 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleOpeningAlreadyExistsException(OpeningAlreadyExistsException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
     }
-}
 
+    @ExceptionHandler(DatabaseAccessException.class)
+    public ResponseEntity<String> handleDatabaseAccessException(DatabaseAccessException ex) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(ServiceClientException.class)
+    public ResponseEntity<String> handleServiceClientException(ServiceClientException ex) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(ServerSideGeneralException.class)
+    public ResponseEntity<String> handleServerSideGeneralException(ServerSideGeneralException ex) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
+    }
+}

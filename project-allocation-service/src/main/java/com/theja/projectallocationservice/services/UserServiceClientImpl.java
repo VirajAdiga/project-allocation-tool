@@ -3,10 +3,13 @@ package com.theja.projectallocationservice.services;
 import com.theja.projectallocationservice.dto.PublicUserListResponse;
 import com.theja.projectallocationservice.entities.enums.PermissionName;
 import com.theja.projectallocationservice.dto.PublicUser;
+import com.theja.projectallocationservice.exceptions.ResourceNotFoundException;
+import com.theja.projectallocationservice.exceptions.ServiceClientException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
@@ -34,15 +37,24 @@ public class UserServiceClientImpl implements UserServiceClient {
         headers.set("Authorization", authHeader);
         HttpEntity<?> entity = new HttpEntity<>(headers);
 
-        ResponseEntity<Object> permissions = new RestTemplate().exchange(
-                url,
-                HttpMethod.GET,
-                entity,
-                Object.class
-        );
+        try {
+            ResponseEntity<Object> permissions = new RestTemplate().exchange(
+                    url,
+                    HttpMethod.GET,
+                    entity,
+                    Object.class
+            );
 
-        List<PermissionName> permissionNames = (List<PermissionName>) permissions.getBody();
-        return permissionNames;
+            List<PermissionName> permissionNames = (List<PermissionName>) permissions.getBody();
+            return permissionNames;
+        }
+        catch (HttpClientErrorException ex) {
+            // Handle specific HTTP client errors (4xx)
+            throw new ServiceClientException("Error communicating with the service:  " + ex.getStatusText());
+        }catch (Exception ex) {
+            // Handle other exceptions
+            throw new ServiceClientException("An error occurred: " + ex.getMessage());
+        }
     }
 
     /**
@@ -58,13 +70,22 @@ public class UserServiceClientImpl implements UserServiceClient {
         headers.set("Authorization", authHeader);
         HttpEntity<?> entity = new HttpEntity<>(headers);
 
-        ResponseEntity<PublicUser> user = new RestTemplate().exchange(
-                url,
-                HttpMethod.GET,
-                entity,
-                PublicUser.class
-        );
-        return user.getBody();
+        try {
+            ResponseEntity<PublicUser> user = new RestTemplate().exchange(
+                    url,
+                    HttpMethod.GET,
+                    entity,
+                    PublicUser.class
+            );
+            return user.getBody();
+        }
+        catch (HttpClientErrorException ex) {
+            // Handle specific HTTP client errors (4xx)
+            throw new ServiceClientException("Error communicating with the service:  " + ex.getStatusText());
+        }catch (Exception ex) {
+            // Handle other exceptions
+            throw new ServiceClientException("An error occurred: " + ex.getMessage());
+        }
     }
 
     /**
@@ -78,13 +99,25 @@ public class UserServiceClientImpl implements UserServiceClient {
         String url = String.format("%sapi/v1/users/public/%s", getUserServiceHost(), userId.toString());
         HttpHeaders headers = new HttpHeaders();
         HttpEntity<?> entity = new HttpEntity<>(headers);
-        ResponseEntity<PublicUser> user = new RestTemplate().exchange(
-                url,
-                HttpMethod.GET,
-                entity,
-                PublicUser.class
-        );
-        return user.getBody();
+        try {
+            ResponseEntity<PublicUser> user = new RestTemplate().exchange(
+                    url,
+                    HttpMethod.GET,
+                    entity,
+                    PublicUser.class
+            );
+            return user.getBody();
+        }
+        catch (ResourceNotFoundException ex) {
+            throw new ServiceClientException("Resource not found with id: " + userId);
+        }
+        catch (HttpClientErrorException ex) {
+            // Handle specific HTTP client errors (4xx)
+            throw new ServiceClientException("Error communicating with the service:  " + ex.getStatusText());
+        } catch (Exception ex) {
+            // Handle other exceptions
+            throw new ServiceClientException("An error occurred: " + ex.getMessage());
+        }
     }
 
     @Override
@@ -93,15 +126,23 @@ public class UserServiceClientImpl implements UserServiceClient {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<?> entity = new HttpEntity<>("{\"userIds\": \"" + userIds + "\"}", headers);
+        try {
+            ResponseEntity<PublicUserListResponse> user = new RestTemplate().exchange(
+                    url,
+                    HttpMethod.POST,
+                    entity,
+                    PublicUserListResponse.class
+            );
 
-        ResponseEntity<PublicUserListResponse> user = new RestTemplate().exchange(
-                url,
-                HttpMethod.POST,
-                entity,
-                PublicUserListResponse.class
-        );
-
-        return user.getBody();
+            return user.getBody();
+        }
+        catch (HttpClientErrorException ex) {
+            // Handle specific HTTP client errors (4xx)
+            throw new ServiceClientException("Error communicating with the service:  " + ex.getStatusText());
+        } catch (Exception ex) {
+            // Handle other exceptions
+            throw new ServiceClientException("An error occurred: " + ex.getMessage());
+        }
     }
 
     @Override
@@ -110,12 +151,20 @@ public class UserServiceClientImpl implements UserServiceClient {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<?> entity = new HttpEntity<>("{\"projectAllocatedId\": \"" + projectId + "\"}", headers);
-
-        new RestTemplate().exchange(
-                url,
-                HttpMethod.POST,
-                entity,
-                String.class
-        );
+        try {
+            new RestTemplate().exchange(
+                    url,
+                    HttpMethod.POST,
+                    entity,
+                    String.class
+            );
+        }
+        catch (HttpClientErrorException ex) {
+            // Handle specific HTTP client errors (4xx)
+            throw new ServiceClientException("Error communicating with the service:  " + ex.getStatusText());
+        } catch (Exception ex) {
+            // Handle other exceptions
+            throw new ServiceClientException("An error occurred: " + ex.getMessage());
+        }
     }
 }

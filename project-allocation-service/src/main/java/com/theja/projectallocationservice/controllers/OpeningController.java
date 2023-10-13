@@ -101,11 +101,7 @@ public class OpeningController {
     public ResponseEntity<com.theja.projectallocationservice.dto.Opening> getOpeningById(@PathVariable("id") Long id) {
         // Fetch an opening by its ID and return it as a model
         Opening opening = openingService.getOpeningById(id);
-        if (opening != null) {
-            return ResponseEntity.ok(openingMapper.entityToModel(opening));
-        } else {
-            throw new OpeningNotFoundException(id);
-        }
+        return ResponseEntity.ok(openingMapper.entityToModel(opening));
     }
 
     /**
@@ -150,9 +146,7 @@ public class OpeningController {
                 .auditLog(auditLog)
                 .build());
         // Check if a duplicate opening with the same attributes already exists for the given project
-        if (openingService.isDuplicateOpening(opening, projectId)) {
-            throw new OpeningAlreadyExistsException("An opening with the same attributes already exists for the project.");
-        }
+        openingService.isDuplicateOpening(opening, projectId);
         auditCommentService.createAuditComment(AuditComment.builder()
                 .comment("Opening is unique")
                 .auditLog(auditLog)
@@ -167,8 +161,7 @@ public class OpeningController {
         // Retrieve the Skill entities from the database using the provided skillIds
         List<Skill> skills = new ArrayList<>();
         for (Skill skill : opening.getSkills()) {
-            skills.add(skillService.getSkillById(skill.getId())
-                    .orElseThrow(() -> new SkillNotFoundException("Skill not found with ID: " + skill.getId())));
+            skills.add(skillService.getSkillById(skill.getId()));
         }
         opening.setSkills(skills);
         auditCommentService.createAuditComment(AuditComment.builder()
@@ -224,9 +217,6 @@ public class OpeningController {
         }
         // Fetch the existing opening and update its properties
         Opening existingOpening = openingService.getOpeningById(id);
-        if (existingOpening == null) {
-            throw new OpeningNotFoundException(id);
-        }
         auditCommentService.createAuditComment(AuditComment.builder()
                 .comment("Opening with " + id + " found")
                 .auditLog(auditLog)
@@ -244,9 +234,6 @@ public class OpeningController {
                 .build());
         // Save the updated opening
         Opening updatedOpening = openingService.updateOpening(id, existingOpening);
-        if (updatedOpening == null) {
-            throw new OpeningUpdateException("Failed to update the opening with ID: " + id);
-        }
         auditCommentService.createAuditComment(AuditComment.builder()
                 .comment("Opening updated")
                 .auditLog(auditLog)
@@ -263,35 +250,31 @@ public class OpeningController {
     public ResponseEntity<com.theja.projectallocationservice.dto.Opening> updateOpeningStatus(@PathVariable Long id, @RequestParam OpeningStatus newStatus) {
         // Fetch the opening by ID and update its status
         Opening opening = openingService.getOpeningById(id);
-        if (opening != null) {
-            OpeningStatus currentStatus = opening.getStatus();
+        OpeningStatus currentStatus = opening.getStatus();
 
-            if (currentStatus == OpeningStatus.ACTIVE) {
-                if (newStatus == OpeningStatus.PENDING || newStatus == OpeningStatus.CLOSED) {
-                    opening.setStatus(newStatus);
-                    Opening dbUpdatedOpening = openingService.updateOpening(id, opening);
-                    return ResponseEntity.ok(openingMapper.entityToModel(dbUpdatedOpening));
-                }
-            } else if (currentStatus == OpeningStatus.PENDING) {
-                if (newStatus == OpeningStatus.ACTIVE || newStatus == OpeningStatus.CLOSED) {
-                    opening.setStatus(newStatus);
-                    Opening dbUpdatedOpening = openingService.updateOpening(id, opening);
-                    return ResponseEntity.ok(openingMapper.entityToModel(dbUpdatedOpening));
-                }
-            } else if (currentStatus == OpeningStatus.CLOSED) {
-                if (newStatus == OpeningStatus.CLOSED) {
-                    opening.setStatus(newStatus);
-                    Opening dbUpdatedOpening = openingService.updateOpening(id, opening);
-                    return ResponseEntity.ok(openingMapper.entityToModel(dbUpdatedOpening));
-                }
+        if (currentStatus == OpeningStatus.ACTIVE) {
+            if (newStatus == OpeningStatus.PENDING || newStatus == OpeningStatus.CLOSED) {
+                opening.setStatus(newStatus);
+                Opening dbUpdatedOpening = openingService.updateOpening(id, opening);
+                return ResponseEntity.ok(openingMapper.entityToModel(dbUpdatedOpening));
             }
-
-            // If the requested status transition is not allowed, return bad request
-            return ResponseEntity.badRequest().build();
+        } else if (currentStatus == OpeningStatus.PENDING) {
+            if (newStatus == OpeningStatus.ACTIVE || newStatus == OpeningStatus.CLOSED) {
+                opening.setStatus(newStatus);
+                Opening dbUpdatedOpening = openingService.updateOpening(id, opening);
+                return ResponseEntity.ok(openingMapper.entityToModel(dbUpdatedOpening));
+            }
+        } else if (currentStatus == OpeningStatus.CLOSED) {
+            if (newStatus == OpeningStatus.CLOSED) {
+                opening.setStatus(newStatus);
+                Opening dbUpdatedOpening = openingService.updateOpening(id, opening);
+                return ResponseEntity.ok(openingMapper.entityToModel(dbUpdatedOpening));
+            }
         }
-        throw new OpeningNotFoundException(id);
-    }
 
+        // If the requested status transition is not allowed, return bad request
+        return ResponseEntity.badRequest().build();
+    }
 
     // Delete an opening
     @DeleteMapping("/{id}")
@@ -299,11 +282,7 @@ public class OpeningController {
     @ApiResponse(responseCode = "204", description = "Opening deleted successfully")
     public ResponseEntity<Void> deleteOpening(@PathVariable("id") Long id) {
         // Delete the opening by ID and return the appropriate response
-        boolean deleted = openingService.deleteOpening(id);
-        if (deleted) {
-            return ResponseEntity.noContent().build();
-        } else {
-            throw new OpeningNotFoundException(id);
-        }
+        openingService.deleteOpening(id);
+        return ResponseEntity.noContent().build();
     }
 }

@@ -1,8 +1,12 @@
 package com.theja.projectallocationservice.services;
 
 import com.theja.projectallocationservice.entities.Skill;
+import com.theja.projectallocationservice.exceptions.DatabaseAccessException;
+import com.theja.projectallocationservice.exceptions.ServerSideGeneralException;
+import com.theja.projectallocationservice.exceptions.SkillNotFoundException;
 import com.theja.projectallocationservice.repositories.SkillRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,8 +23,21 @@ public class SkillService {
      * @param skillId The ID of the skill to retrieve.
      * @return An Optional containing the retrieved skill, or an empty Optional if not found.
      */
-    public Optional<Skill> getSkillById(Long skillId) {
-        return skillRepository.findById(skillId);
+    public Skill getSkillById(Long skillId) {
+        Optional<Skill> skill;
+        try {
+            skill = skillRepository.findById(skillId);
+        }
+        catch (DataAccessException exception){
+            throw new DatabaseAccessException("Error accessing the database");
+        }
+        catch (Exception exception){
+            throw new ServerSideGeneralException("Something went wrong!");
+        }
+        if (skill.isEmpty()) {
+            throw new SkillNotFoundException("Skill not found with id " + skillId);
+        }
+        return skill.get();
     }
 
     /**
@@ -30,7 +47,15 @@ public class SkillService {
      * @return The created skill.
      */
     public Skill createSkill(Skill skill) {
-        return skillRepository.save(skill);
+        try {
+            return skillRepository.save(skill);
+        }
+        catch (DataAccessException exception){
+            throw new DatabaseAccessException("Error accessing the database");
+        }
+        catch (Exception exception){
+            throw new ServerSideGeneralException("Something went wrong!");
+        }
     }
 
     /**
@@ -39,6 +64,14 @@ public class SkillService {
      * @return A list containing all skills.
      */
     public List<Skill> getAllSkills() {
-        return skillRepository.findAll();
+        try {
+            return skillRepository.findAll();
+        }
+        catch (DataAccessException exception){
+            throw new DatabaseAccessException("Error accessing the database");
+        }
+        catch (Exception exception){
+            throw new ServerSideGeneralException("Something went wrong!");
+        }
     }
 }

@@ -5,7 +5,6 @@ import com.theja.projectallocationservice.dto.RequestContext;
 import com.theja.projectallocationservice.entities.enums.ApplicationStatus;
 import com.theja.projectallocationservice.entities.enums.PermissionName;
 import com.theja.projectallocationservice.exceptions.ApplicationNotFoundException;
-import com.theja.projectallocationservice.exceptions.ResourceNotFoundException;
 import com.theja.projectallocationservice.exceptions.UnauthorizedAccessException;
 import com.theja.projectallocationservice.mappers.ApplicationMapper;
 import com.theja.projectallocationservice.entities.*;
@@ -130,13 +129,7 @@ public class ApplicationController {
     ) {
         // Fetch application details based on openingId and candidateId
         Application application = applicationService.getApplicationByOpeningIdAndCandidateId(openingId, candidateId);
-
-        // If found, return the application; otherwise, throw ResourceNotFoundException
-        if (application != null) {
-            return ResponseEntity.ok(applicationMapper.entityToModel(application));
-        } else {
-            throw new ResourceNotFoundException("Application not found with opening ID: " + openingId + " or candidate ID " + candidateId);
-        }
+        return ResponseEntity.ok(applicationMapper.entityToModel(application));
     }
 
     /**
@@ -165,27 +158,22 @@ public class ApplicationController {
                 .comment("Opening with id " + openingId + " found")
                 .auditLog(auditLog)
                 .build());
-        // Opening
-        if (opening != null) {
-            // Associate the application with the opening
-            Application application = new Application();
-            application.setOpening(opening);
-            application.setCandidateId(requestContext.getLoggedinUser().getId());
-            application.setStatus(ApplicationStatus.APPLIED);
-            application.setAppliedAt(new Date());
-            application.setInterviews(new ArrayList<>());
-            // Save the application to the database
-            Application dbCreatedApplication = applicationService.createApplication(application);
-            auditCommentService.createAuditComment(AuditComment.builder()
-                    .comment("Applied for opening successfully")
-                    .auditLog(auditLog)
-                    .build());
-            // Create a new application for the specified opening
-            // Save the application and return it in the response
-            return ResponseEntity.status(HttpStatus.CREATED).body(applicationMapper.entityToModel(dbCreatedApplication));
-        } else {
-            throw new ResourceNotFoundException("Opening not found with ID: " + openingId);
-        }
+        // Associate the application with the opening
+        Application application = new Application();
+        application.setOpening(opening);
+        application.setCandidateId(requestContext.getLoggedinUser().getId());
+        application.setStatus(ApplicationStatus.APPLIED);
+        application.setAppliedAt(new Date());
+        application.setInterviews(new ArrayList<>());
+        // Save the application to the database
+        Application dbCreatedApplication = applicationService.createApplication(application);
+        auditCommentService.createAuditComment(AuditComment.builder()
+                .comment("Applied for opening successfully")
+                .auditLog(auditLog)
+                .build());
+        // Create a new application for the specified opening
+        // Save the application and return it in the response
+        return ResponseEntity.status(HttpStatus.CREATED).body(applicationMapper.entityToModel(dbCreatedApplication));
     }
 
     /**
