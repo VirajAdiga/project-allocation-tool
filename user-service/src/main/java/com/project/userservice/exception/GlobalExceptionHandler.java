@@ -61,4 +61,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleServiceClientException(ServiceClientException ex) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
     }
+
+    @ExceptionHandler(ServerSideGeneralException.class)
+    public ResponseEntity<String> handleServerSideGeneralException(ServerSideGeneralException ex) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
+    }
 }
