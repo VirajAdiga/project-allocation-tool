@@ -11,7 +11,7 @@ pipeline {
         stage('Build') {
             steps {
                 bat 'echo Hello'
-                bat "./mvnw clean compile test package"
+                bat "call mvnw.cmd clean compile test package"
             }
         }
 
