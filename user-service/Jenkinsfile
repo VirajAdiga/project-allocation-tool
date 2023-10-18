@@ -11,7 +11,7 @@ pipeline {
         stage('Build') {
             steps {
                 dir('user-service') {
-                    bat 'Building user-service jar'
+                    bat 'echo Building the artifact'
                     bat "call mvnw.cmd clean compile test package"
                 }
             }
@@ -19,8 +19,8 @@ pipeline {
 
         stage('Archive Artifacts') {
             steps {
-                dir('user-service') {
-                    bat 'Archiving artifacts'
+                dir('user-service'){
+                    bat 'echo Archiving the artifact'
                     archiveArtifacts 'target/*.jar'
                 }
             }
