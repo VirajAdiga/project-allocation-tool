@@ -4,7 +4,6 @@ import com.theja.projectallocationservice.dto.RequestContext;
 import com.theja.projectallocationservice.dto.UpdateFeedbackRequest;
 import com.theja.projectallocationservice.entities.enums.InterviewStatus;
 import com.theja.projectallocationservice.entities.enums.PermissionName;
-import com.theja.projectallocationservice.exceptions.ResourceNotFoundException;
 import com.theja.projectallocationservice.exceptions.UnauthorizedAccessException;
 import com.theja.projectallocationservice.mappers.InterviewMapper;
 import com.theja.projectallocationservice.entities.*;
