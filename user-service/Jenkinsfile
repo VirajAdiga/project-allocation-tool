@@ -10,8 +10,8 @@ pipeline {
 
         stage('Build') {
             steps {
-                sh 'echo Hello'
-                sh "./mvnw clean compile test package"
+                bat 'echo Hello'
+                bat "./mvnw clean compile test package"
             }
         }
 
