@@ -12,7 +12,7 @@ pipeline {
             steps {
                 bat 'echo Hello'
                 bat 'dir'
-                bat "call mvnw.cmd clean compile test package"
+                bat "call user-service/mvnw.cmd clean compile test package"
             }
         }
 
