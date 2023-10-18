@@ -10,9 +10,11 @@ pipeline {
 
         stage('Build') {
             steps {
-                bat 'echo Hello'
-                bat 'dir'
-                bat "call user-service/mvnw.cmd clean compile test package"
+                dir('user-service') {
+                    bat 'echo Hello'
+                    bat 'dir'
+                    bat "call mvnw.cmd clean compile test package"
+                }
             }
         }
 
