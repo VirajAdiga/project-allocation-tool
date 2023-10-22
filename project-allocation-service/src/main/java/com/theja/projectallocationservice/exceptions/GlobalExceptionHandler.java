@@ -77,4 +77,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleServerSideGeneralException(ServerSideGeneralException ex) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
     }
+
+    @ExceptionHandler(PublishMessageException.class)
+    public ResponseEntity<String> handlePublishMessageException(PublishMessageException ex){
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
+    }
 }
