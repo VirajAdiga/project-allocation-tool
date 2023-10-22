@@ -37,7 +37,6 @@ services:
       - ./rabbitmq/.env
     ports:
       - "5672:5672"
-      - "15672:15672"
     networks:
       - project_allocation_tool_network
 
@@ -62,4 +61,15 @@ services:
       - project_allocation_tool_network
     depends_on:
       - mysql-db
+      - rabbitmq
+
+  email-service:
+    build:
+      context: ./email-service
+      dockerfile: Dockerfile
+    env_file:
+      - ./email-service/.env
+    networks:
+      - project_allocation_tool_network
+    depends_on:
       - rabbitmq
