@@ -31,6 +31,16 @@ services:
     networks:
       - project_allocation_tool_network
 
+  rabbitmq:
+    image: rabbitmq:latest
+    env_file:
+      - ./rabbitmq/.env
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - project_allocation_tool_network
+
   user-service:
     build:
       context: ./user-service
@@ -52,3 +62,4 @@ services:
       - project_allocation_tool_network
     depends_on:
       - mysql-db
+      - rabbitmq
