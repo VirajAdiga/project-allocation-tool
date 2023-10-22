@@ -150,7 +150,7 @@ public class ProjectController {
                 .auditLog(auditLog)
                 .build());
         // Create the project, save it, and return the response
-        Project dbCreatedProject = projectService.createProject(projectDTO);
+        Project dbCreatedProject = projectService.createProject(projectDTO, requestContext.getLoggedinUser());
         auditCommentService.createAuditComment(AuditComment.builder()
                 .comment("Project created")
                 .auditLog(auditLog)

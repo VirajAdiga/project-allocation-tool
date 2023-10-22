@@ -1,16 +1,22 @@
 package com.theja.projectallocationservice.services;
 
 import com.theja.projectallocationservice.dto.CreateProjectDTO;
+import com.theja.projectallocationservice.dto.EmailMessage;
+import com.theja.projectallocationservice.dto.PublicUser;
 import com.theja.projectallocationservice.entities.Project;
+import com.theja.projectallocationservice.entities.enums.EmailTriggerActions;
 import com.theja.projectallocationservice.exceptions.DatabaseAccessException;
+import com.theja.projectallocationservice.exceptions.PublishMessageException;
 import com.theja.projectallocationservice.exceptions.ResourceNotFoundException;
 import com.theja.projectallocationservice.exceptions.ServerSideGeneralException;
+import com.theja.projectallocationservice.mappers.EmailTriggerToMessageMapper;
 import com.theja.projectallocationservice.repositories.ProjectRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
 import java.util.List;
@@ -25,6 +31,12 @@ public class ProjectService {
 
     @Autowired
     private ProjectRepository projectRepository;
+
+    @Autowired
+    private RabbitmqMessageService rabbitmqMessageService;
+
+    @Autowired
+    private EmailTriggerToMessageMapper emailTriggerToMessageMapper;
 
     /**
      * Retrieves a page of projects based on specified parameters.
@@ -96,15 +108,26 @@ public class ProjectService {
      * @param projectDTO The data for creating the new project.
      * @return The created project.
      */
-    public Project createProject(CreateProjectDTO projectDTO) {
+    @Transactional
+    public Project createProject(CreateProjectDTO projectDTO, PublicUser user) {
         Project project = new Project();
         project.setTitle(projectDTO.getTitle());
         project.setDetails(projectDTO.getDetails());
         try {
-            return projectRepository.save(project);
+            Project projectSaved = projectRepository.save(project);
+            EmailMessage emailMessage = EmailMessage.builder().
+                    recipient(user.getEmail()).
+                    subject("Project created").
+                    body(emailTriggerToMessageMapper.getEmailCode(EmailTriggerActions.PROJECT_CREATION)).
+                    build();
+            rabbitmqMessageService.sendMessageToQueue(emailMessage);
+            return projectSaved;
         }
         catch (DataAccessException exception){
             throw new DatabaseAccessException("Error accessing the database");
+        }
+        catch (PublishMessageException exception){
+            throw new PublishMessageException(exception.getMessage());
         }
         catch (Exception exception){
             throw new ServerSideGeneralException("Something went wrong!");
