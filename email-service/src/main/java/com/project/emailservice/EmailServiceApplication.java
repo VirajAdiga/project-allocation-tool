@@ -1,5 +1,6 @@
 package com.project.emailservice;
 
+import org.springframework.amqp.rabbit.annotation.EnableRabbit;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -8,6 +9,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * This class serves as the entry point for the Spring Boot application.
  */
 @SpringBootApplication
+@EnableRabbit
 public class EmailServiceApplication {
 
 	/**
