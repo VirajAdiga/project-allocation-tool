@@ -166,7 +166,7 @@ public class ApplicationController {
         application.setAppliedAt(new Date());
         application.setInterviews(new ArrayList<>());
         // Save the application to the database
-        Application dbCreatedApplication = applicationService.createApplication(application);
+        Application dbCreatedApplication = applicationService.createApplication(application, requestContext.getLoggedinUser());
         auditCommentService.createAuditComment(AuditComment.builder()
                 .comment("Applied for opening successfully")
                 .auditLog(auditLog)
@@ -264,7 +264,6 @@ public class ApplicationController {
                     .build());
             if (newStatus != ApplicationStatus.REJECTED) {
                 projectService.allocateUser(dbUpdatedApplication.getOpening().getProject(), dbUpdatedApplication.getCandidateId());
-                userServiceClient.updateUserProjectAllocation(dbUpdatedApplication.getCandidateId(), dbUpdatedApplication.getOpening().getProject().getId());
                 auditCommentService.createAuditComment(AuditComment.builder()
                         .comment("Application accepted and applicant is allocated to the project")
                         .auditLog(auditLog)

@@ -1,10 +1,14 @@
 package com.theja.projectallocationservice.services;
 
+import com.theja.projectallocationservice.dto.EmailMessage;
+import com.theja.projectallocationservice.dto.PublicUser;
 import com.theja.projectallocationservice.entities.enums.ApplicationStatus;
+import com.theja.projectallocationservice.entities.enums.EmailTriggerActions;
 import com.theja.projectallocationservice.exceptions.DatabaseAccessException;
 import com.theja.projectallocationservice.exceptions.ResourceNotFoundException;
 import com.theja.projectallocationservice.entities.*;
 import com.theja.projectallocationservice.exceptions.ServerSideGeneralException;
+import com.theja.projectallocationservice.mappers.EmailTriggerToMessageMapper;
 import com.theja.projectallocationservice.repositories.ApplicationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -21,6 +25,10 @@ import java.util.Optional;
 public class ApplicationService {
     @Autowired
     private ApplicationRepository applicationRepository;
+    @Autowired
+    private RabbitmqMessageService rabbitmqMessageService;
+    @Autowired
+    private EmailTriggerToMessageMapper emailTriggerToMessageMapper;
 
     /**
      * Retrieves a page of applications based on the provided status.
@@ -75,9 +83,16 @@ public class ApplicationService {
      * @param application The application to create.
      * @return The created application.
      */
-    public Application createApplication(Application application) {
+    public Application createApplication(Application application, PublicUser user) {
         try {
-            return applicationRepository.save(application);
+            Application applicationSaved = applicationRepository.save(application);
+            EmailMessage emailMessage = EmailMessage.builder().
+                    recipient(user.getEmail()).
+                    subject("Applied to opening").
+                    body(emailTriggerToMessageMapper.getEmailCode(EmailTriggerActions.APPLICATION_CREATION)).
+                    build();
+            rabbitmqMessageService.sendMessageToQueue(emailMessage);
+            return applicationSaved;
         }
         catch (DataAccessException exception){
             throw new DatabaseAccessException("Error accessing the database");

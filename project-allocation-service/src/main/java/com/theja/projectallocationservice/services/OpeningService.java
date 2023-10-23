@@ -1,8 +1,12 @@
 package com.theja.projectallocationservice.services;
 
+import com.theja.projectallocationservice.dto.EmailMessage;
+import com.theja.projectallocationservice.dto.PublicUser;
 import com.theja.projectallocationservice.entities.Opening;
 import com.theja.projectallocationservice.dto.RequestContext;
+import com.theja.projectallocationservice.entities.enums.EmailTriggerActions;
 import com.theja.projectallocationservice.exceptions.*;
+import com.theja.projectallocationservice.mappers.EmailTriggerToMessageMapper;
 import com.theja.projectallocationservice.repositories.OpeningRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -22,6 +26,10 @@ public class OpeningService {
     private OpeningRepository openingRepository;
     @Autowired
     private RequestContext requestContext;
+    @Autowired
+    private RabbitmqMessageService rabbitmqMessageService;
+    @Autowired
+    private EmailTriggerToMessageMapper emailTriggerToMessageMapper;
 
     /**
      * Retrieves a page of openings based on specified parameters.
@@ -94,9 +102,16 @@ public class OpeningService {
      * @param opening The opening to create.
      * @return The created opening.
      */
-    public Opening createOpening(Opening opening) {
+    public Opening createOpening(Opening opening, PublicUser user) {
         try {
-            return openingRepository.save(opening);
+            Opening openingSaved = openingRepository.save(opening);
+            EmailMessage emailMessage = EmailMessage.builder().
+                    recipient(user.getEmail()).
+                    subject("Opening created").
+                    body(emailTriggerToMessageMapper.getEmailCode(EmailTriggerActions.OPENING_CREATION)).
+                    build();
+            rabbitmqMessageService.sendMessageToQueue(emailMessage);
+            return openingSaved;
         }
         catch (DataAccessException exception){
             throw new DatabaseAccessException("Error accessing the database");

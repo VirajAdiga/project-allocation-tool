@@ -37,6 +37,8 @@ public class ProjectService {
 
     @Autowired
     private EmailTriggerToMessageMapper emailTriggerToMessageMapper;
+    @Autowired
+    private UserServiceClient userServiceClient;
 
     /**
      * Retrieves a page of projects based on specified parameters.
@@ -224,6 +226,14 @@ public class ProjectService {
 
         try {
             // Save the updated project with the allocated user to the repository
+            PublicUser user = userServiceClient.getUserById(candidateId);
+            EmailMessage emailMessage = EmailMessage.builder().
+                    recipient(user.getEmail()).
+                    subject("Allocated to project").
+                    body(emailTriggerToMessageMapper.getEmailCode(EmailTriggerActions.PROJECT_ALLOCATION)).
+                    build();
+            rabbitmqMessageService.sendMessageToQueue(emailMessage);
+            userServiceClient.updateUserProjectAllocation(candidateId, project.getId());
             projectRepository.save(project);
         }
         catch (DataAccessException exception){

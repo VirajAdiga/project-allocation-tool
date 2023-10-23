@@ -170,7 +170,7 @@ public class OpeningController {
                 .build());
         // Set the opening status, create it, and return the response
         opening.setStatus(OpeningStatus.ACTIVE);
-        Opening dbCreatedOpening = openingService.createOpening(opening);
+        Opening dbCreatedOpening = openingService.createOpening(opening, requestContext.getLoggedinUser());
         com.theja.projectallocationservice.dto.Opening createdOpening = openingMapper.entityToModel(dbCreatedOpening);
         auditCommentService.createAuditComment(AuditComment.builder()
                 .comment("Opening created")
