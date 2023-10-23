@@ -1,6 +1,5 @@
 package com.theja.projectallocationservice.services;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.theja.projectallocationservice.dto.EmailMessage;
 import com.theja.projectallocationservice.exceptions.PublishMessageException;
 import lombok.extern.slf4j.Slf4j;
@@ -21,8 +20,6 @@ public class RabbitmqMessageService {
 
     public void sendMessageToQueue(EmailMessage emailMessage){
         try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            String payloadString = objectMapper.writeValueAsString(emailMessage);
             rabbitTemplate.convertAndSend(queue.getName(), emailMessage);
         }
         catch (Exception exception){

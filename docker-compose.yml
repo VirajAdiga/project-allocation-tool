@@ -35,8 +35,6 @@ services:
     image: rabbitmq:latest
     env_file:
       - ./rabbitmq/.env
-    ports:
-      - "5672:5672"
     networks:
       - project_allocation_tool_network
 
