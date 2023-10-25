@@ -35,6 +35,8 @@ services:
     image: rabbitmq:latest
     env_file:
       - ./rabbitmq/.env
+    volumes:
+      - /var/lib/docker/volumes/rabbitmq_data/_data:/var/lib/rabbitmq
     networks:
       - project_allocation_tool_network
 
