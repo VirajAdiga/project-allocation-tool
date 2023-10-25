@@ -46,8 +46,13 @@ public class RabbitMQConfig {
     }
 
     @Bean
-    public Queue queue() {
+    public Queue emailQueue() {
         return new Queue("email-queue", false);
+    }
+
+    @Bean
+    public Queue searchQueue() {
+        return new Queue("search-queue", false);
     }
 
     @Bean
