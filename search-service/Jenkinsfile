@@ -1,0 +1,27 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Build') {
+            steps {
+                dir('search-service') {
+                    bat "call mvnw.cmd clean compile test package"
+                }
+            }
+        }
+
+        stage('Archive Artifacts') {
+            steps {
+                dir('search-service'){
+                    archiveArtifacts 'target/*.jar'
+                }
+            }
+        }
+    }
+}
