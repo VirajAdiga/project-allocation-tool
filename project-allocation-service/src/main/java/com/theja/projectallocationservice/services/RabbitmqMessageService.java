@@ -1,6 +1,7 @@
 package com.theja.projectallocationservice.services;
 
 import com.theja.projectallocationservice.dto.EmailMessage;
+import com.theja.projectallocationservice.dto.OpeningSearchMessage;
 import com.theja.projectallocationservice.exceptions.PublishMessageException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.Queue;
@@ -18,11 +19,25 @@ public class RabbitmqMessageService {
 
     @Autowired
     @Qualifier("emailQueue")
-    private Queue queue;
+    private Queue emailQueue;
+
+    @Autowired
+    @Qualifier("searchQueue")
+    private Queue searchQueue;
 
     public void sendMessageToQueue(EmailMessage emailMessage){
         try {
-            rabbitTemplate.convertAndSend(queue.getName(), emailMessage);
+            rabbitTemplate.convertAndSend(emailQueue.getName(), emailMessage);
+        }
+        catch (Exception exception){
+            log.info(exception.getMessage());
+            throw new PublishMessageException("Error publishing the message");
+        }
+    }
+
+    public void sendMessageToQueue(OpeningSearchMessage openingSearchMessage){
+        try {
+            rabbitTemplate.convertAndSend(searchQueue.getName(), openingSearchMessage);
         }
         catch (Exception exception){
             log.info(exception.getMessage());

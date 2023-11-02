@@ -1,9 +1,11 @@
 package com.theja.projectallocationservice.services;
 
 import com.theja.projectallocationservice.dto.EmailMessage;
+import com.theja.projectallocationservice.dto.OpeningSearchMessage;
 import com.theja.projectallocationservice.dto.PublicUser;
 import com.theja.projectallocationservice.entities.Opening;
 import com.theja.projectallocationservice.dto.RequestContext;
+import com.theja.projectallocationservice.entities.Skill;
 import com.theja.projectallocationservice.entities.enums.EmailTriggerActions;
 import com.theja.projectallocationservice.exceptions.*;
 import com.theja.projectallocationservice.mappers.EmailTriggerToMessageMapper;
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Service class for managing opening-related operations.
@@ -111,6 +114,18 @@ public class OpeningService {
                     body(emailTriggerToMessageMapper.getEmailCode(EmailTriggerActions.OPENING_CREATION)).
                     build();
             rabbitmqMessageService.sendMessageToQueue(emailMessage);
+            OpeningSearchMessage openingSearchMessage = OpeningSearchMessage.builder().
+                    id(openingSaved.getId()).
+                    title(openingSaved.getTitle()).
+                    details(openingSaved.getDetails()).
+                    level(openingSaved.getLevel()).
+                    location(openingSaved.getLocation()).
+                    status(openingSaved.getStatus().toString()).
+                    projectName(openingSaved.getProject().getTitle()).
+                    skills(openingSaved.getSkills().stream().map(Skill::getTitle).collect(Collectors.toList())).
+                    actionType("CREATE").
+                    build();
+            rabbitmqMessageService.sendMessageToQueue(openingSearchMessage);
             return openingSaved;
         }
         catch (DataAccessException exception){
@@ -196,6 +211,11 @@ public class OpeningService {
         }
         if (opening.isPresent()) {
             openingRepository.deleteById(id);
+            OpeningSearchMessage openingSearchMessage = OpeningSearchMessage.builder().
+                    id(opening.get().getId()).
+                    actionType("DELETE").
+                    build();
+            rabbitmqMessageService.sendMessageToQueue(openingSearchMessage);
             return true;
         } else {
             throw new OpeningNotFoundException(id);
