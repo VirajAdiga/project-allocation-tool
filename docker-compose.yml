@@ -17,6 +17,7 @@ services:
     depends_on:
       - user-service
       - project-allocation-service
+      - search-service
     networks:
       - project_allocation_tool_network
     
@@ -37,6 +38,18 @@ services:
       - ./rabbitmq/.env
     volumes:
       - /var/lib/docker/volumes/rabbitmq_data/_data:/var/lib/rabbitmq
+    networks:
+      - project_allocation_tool_network
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.15.2
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+    ports:
+      - "9200:9200"
+    volumes:
+      - /var/lib/docker/volumes/elasticsearch_data/_data:/usr/share/elasticsearch/data
     networks:
       - project_allocation_tool_network
 
@@ -73,3 +86,15 @@ services:
       - project_allocation_tool_network
     depends_on:
       - rabbitmq
+
+  search-service:
+    build:
+      context: ./search-service
+      dockerfile: Dockerfile
+    env_file:
+      - ./search-service/.env
+    networks:
+      - project_allocation_tool_network
+    depends_on:
+      - rabbitmq
+      - elasticsearch
