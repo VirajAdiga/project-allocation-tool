@@ -4,7 +4,6 @@ import com.project.searchservice.dto.OpeningSearchList;
 import com.project.searchservice.entities.OpeningSearch;
 import com.project.searchservice.exception.ServerSideGeneralException;
 import com.project.searchservice.repositories.OpeningSearchRepository;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -14,7 +13,6 @@ import java.io.IOException;
 import java.util.List;
 
 @Service
-@Slf4j
 public class OpeningSearchService {
 
     @Autowired
