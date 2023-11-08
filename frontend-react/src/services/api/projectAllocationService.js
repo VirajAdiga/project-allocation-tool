@@ -114,11 +114,7 @@ export class ProjectAllocationService {
                   
     static applyForOpening = async(openingId, userId, authToken) => {
         try {
-            const response = await axios.post(PROJECT_ALLOCATION_SERVICE_BASE_URL + '/api/v1/openings/' + openingId + '/applications', {
-                "candidate": {
-                    "id": userId
-                }
-            }, { headers: {"Authorization" : `Bearer ${authToken}`} });
+            const response = await axios.post(PROJECT_ALLOCATION_SERVICE_BASE_URL + '/api/v1/applications/openings/' + openingId, {}, { headers: {"Authorization" : `Bearer ${authToken}`} });
             return response.data;
         } catch (error) {
           console.log('error', error);
@@ -166,7 +162,7 @@ export class ProjectAllocationService {
 
     static createOpening = async (projectId, payload, authToken) => {
       try {
-          const response = await axios.post(PROJECT_ALLOCATION_SERVICE_BASE_URL + '/api/v1/projects/' + projectId + '/openings', payload, { headers: {"Authorization" : `Bearer ${authToken}`} });
+          const response = await axios.post(PROJECT_ALLOCATION_SERVICE_BASE_URL + '/api/v1/openings/projects/' + projectId, payload, { headers: {"Authorization" : `Bearer ${authToken}`} });
           return response.data; // Return the data instead of the entire response object
       } catch (error) {
           if (error.response) {
@@ -227,7 +223,7 @@ export class ProjectAllocationService {
       static scheduleInterview = async (applicationId, interviewData, authToken) => {
         try {
           const response = await axios.post(
-            `${PROJECT_ALLOCATION_SERVICE_BASE_URL}/api/v1/applications/${applicationId}/interviews`,
+            `${PROJECT_ALLOCATION_SERVICE_BASE_URL}/api/v1/interviews/applications/${applicationId}`,
             interviewData,
             { headers: { Authorization: `Bearer ${authToken}` } }
           );
@@ -283,23 +279,4 @@ export class ProjectAllocationService {
           }
         }
       };
-
-      static fetchFreePoolUsers = async (authToken, pageSize, pageNumber) => {
-        try {
-            const response = await axios.get(`${PROJECT_ALLOCATION_SERVICE_BASE_URL}/api/v1/reports/users/free?pageSize=${pageSize}&pageNumber=${pageNumber}`, { headers: {"Authorization" : `Bearer ${authToken}`} });
-            return response.data;
-          } catch (error) {
-            throw new Error('Unable to fetch the free pool users data');
-          }
-      }
-
-      // `http://localhost:9091/api/v1/reports/users/allocated?startDate=${startDate.toISOString()}&endDate=${endDate.toISOString()}`
-      static fetchAllocatedUsers = async (startDate, endDate, authToken, pageSize, pageNumber) => {
-        try {
-            const response = await axios.get(`${PROJECT_ALLOCATION_SERVICE_BASE_URL}/api/v1/reports/users/allocated?startDate=${startDate.toISOString()}&endDate=${endDate.toISOString()}&pageSize=${pageSize}&pageNumber=${pageNumber}`, { headers: {"Authorization" : `Bearer ${authToken}`} });
-            return response.data;
-          } catch (error) {
-            throw new Error('Unable to fetch the allocated users data');
-          }
-      }
 }

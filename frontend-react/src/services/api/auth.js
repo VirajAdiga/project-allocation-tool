@@ -9,7 +9,7 @@ export class AuthService {
         const requestBody = { email, password };
 
         try {
-            const response = await axios.post(`${USER_SERVICE_BASE_URL}/api/v1/auth/authenticate`, requestBody);
+            const response = await axios.post(`${USER_SERVICE_BASE_URL}/api/v1/authentication/authenticate`, requestBody);
             return response.data;
         } catch (error) {
             throw new Error('Invalid credentials. Please try again.');
@@ -70,7 +70,7 @@ export class AuthService {
         const requestBody = { name, email, password, role };
 
         try {
-            const response = await axios.post(`${USER_SERVICE_BASE_URL}/api/v1/auth/register`, requestBody);
+            const response = await axios.post(`${USER_SERVICE_BASE_URL}/api/v1/authentication/register`, requestBody);
             return response.data;
         } catch (error) {
             console.log('error', error);
@@ -134,10 +134,29 @@ export class AuthService {
 
     static logout = async (tokenStr) => {
         try {
-            const response = await axios.delete(`${USER_SERVICE_BASE_URL}/api/v1/auth/logout`, { headers: {"Authorization" : `Bearer ${tokenStr}`} });
+            const response = await axios.delete(`${USER_SERVICE_BASE_URL}/api/v1/authentication/logout`, { headers: {"Authorization" : `Bearer ${tokenStr}`} });
             return response.status;
         } catch (error) {
             throw new Error('Unable to logout. Please try again.');
+        }
+    }
+
+    static fetchFreePoolUsers = async (authToken, pageSize, pageNumber) => {
+        try {
+            const response = await axios.get(`${USER_SERVICE_BASE_URL}/api/v1/users/reports/free?pageSize=${pageSize}&pageNumber=${pageNumber}`, { headers: {"Authorization" : `Bearer ${authToken}`} });
+            return response.data;
+          } catch (error) {
+            throw new Error('Unable to fetch the free pool users data');
+          }
+      }
+
+    // `http://localhost:9092/api/v1/reports/users/allocated?startDate=${startDate.toISOString()}&endDate=${endDate.toISOString()}`
+    static fetchAllocatedUsers = async (startDate, endDate, authToken, pageSize, pageNumber) => {
+    try {
+        const response = await axios.get(`${USER_SERVICE_BASE_URL}/api/v1/users/reports/allocated?pageSize=${pageSize}&pageNumber=${pageNumber}`, { headers: {"Authorization" : `Bearer ${authToken}`} });
+        return response.data;
+        } catch (error) {
+        throw new Error('Unable to fetch the allocated users data');
         }
     }
 }
