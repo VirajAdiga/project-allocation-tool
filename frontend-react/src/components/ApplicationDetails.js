@@ -70,7 +70,7 @@ const ApplicationDetails = ({ openingId, loggedinUser, onClose }) => {
   };
 
   // Determine whether to show the "Interviews scheduled" information as plain text or a link
-  const interviewsScheduledContent = applicationData.interviews.length > 0 ? (
+  const interviewsScheduledContent = applicationData.interviews && applicationData.interviews.length > 0 ? (
     <Tooltip title="View interview details">
       <Typography
         style={{
@@ -157,7 +157,7 @@ const ApplicationDetails = ({ openingId, loggedinUser, onClose }) => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {applicationData.interviews.map(interview => (
+                {applicationData.interviews && applicationData.interviews.map(interview => (
                   <TableRow key={interview.id}>
                     <TableCell align='center'>{new Date(interview.scheduledTime).toLocaleString()}</TableCell>
                     <TableCell align='center'>{interview.interviewer.name}</TableCell>

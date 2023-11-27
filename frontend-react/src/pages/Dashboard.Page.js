@@ -9,6 +9,7 @@
   import AdminPanel from '../components/AdminPanel';
   import ActivityLog from '../components/ActivityLog';
   import ManageProjects from '../components/ManageProjects';
+  import SearchOpening from '../components/SearchOpening';
 
 
   const UserDashboard = () => {
@@ -19,6 +20,7 @@
   const menuOptionsMapping = {
     'VIEW_ALL_OPENINGS': { label: 'Project Opportunities', component: () => <OpeningsList userType="employee" showApplied={false} loggedinUser={loggedinUser} /> },
     'VIEW_APPLIED_OPENINGS': { label: 'Opportunities Applied', component: () => <OpeningsList userType="employee" showApplied={true} loggedinUser={loggedinUser} /> },
+    'SEARCH_OPENINGS': { label: 'Search Openings', component: () => <SearchOpening loggedinUser={loggedinUser}/> },
     'RECRUITER_OWN_OPENINGS': { label: 'Openings Posted by You', component: () => <OpeningsList userType="recruiter" showApplied={false} loggedinUser={loggedinUser} ownOpenings={true}/> },
     'RECRUITER_OTHER_OPENINGS': { label: 'Openings by Other Recruiters', component: () => <OpeningsList userType="recruiter" showApplied={false} loggedinUser={loggedinUser} ownOpenings={false}/> },
     'ADMIN_OWN_OPENINGS': { label: 'Openings Posted by You', component: () => <OpeningsList userType="admin" showApplied={false} loggedinUser={loggedinUser} ownOpenings={true}/> },
@@ -38,6 +40,9 @@
 
       // Check if userPermissions is not null before mapping over it
       const userMenuOptions = userPermissions ? userPermissions.map((permission) => menuOptionsMapping[permission]) : [];
+      
+      // Add search opening permission for every type of user
+      userMenuOptions.push(menuOptionsMapping['SEARCH_OPENINGS']);
 
       // Filter out any undefined menu options
       const filteredMenuOptions = userMenuOptions.filter((option) => option);
