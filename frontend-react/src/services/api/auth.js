@@ -134,7 +134,7 @@ export class AuthService {
 
     static logout = async (tokenStr) => {
         try {
-            const response = await axios.delete(`${USER_SERVICE_BASE_URL}/api/v1/authentication/logout`, { headers: {"Authorization" : `Bearer ${tokenStr}`} });
+            const response = await axios.post(`${USER_SERVICE_BASE_URL}/api/v1/authentication/logout`, {}, { headers: {"Authorization" : `Bearer ${tokenStr}`} });
             return response.status;
         } catch (error) {
             throw new Error('Unable to logout. Please try again.');
